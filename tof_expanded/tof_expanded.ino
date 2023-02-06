@@ -53,8 +53,14 @@ void loop() {
     Serial.print(index);
     Serial.print(": ");
     int reading = sensor.readRangeContinuousMillimeters();
-    if (reading < 8000){Serial.print(reading);Serial.print(" mm  ");}
+    
+    if (reading < 1100){
+      Serial.print("    ");
+      Serial.print(reading);
+      Serial.print(" mm  ");
+      }
     else {Serial.print("OutOfRange  ");}
+    
     if (sensor.timeoutOccurred()) { Serial.print(" TIMEOUT"); }
     delay(10);
   }
