@@ -15,10 +15,10 @@ void TCA9548A(uint8_t bus)  //function of TCA9548A
 }
 
 VL53L0X Select(int index) {
-  if (index == 4) { return sensor4; }
-  if (index == 5) { return sensor5; }
-  if (index == 6) { return sensor6; }
-  if (index == 7) { return sensor7; }
+  if (index == 4) { return sensor4; } // rear right TOF
+  if (index == 5) { return sensor5; } // rear left TOF
+  if (index == 6) { return sensor6; } // front left TOF
+  if (index == 7) { return sensor7; } // front right TOF
 }
 VL53L0X sensor;
 void setup() {
@@ -30,7 +30,7 @@ void setup() {
     TCA9548A(index);
     sensor = Select(index);
 
-    sensor.setTimeout(500);
+    sensor.setTimeout(100);
 
     if (!sensor.init()) {
       Serial.println("Failed to detect and initialize sensor!");
