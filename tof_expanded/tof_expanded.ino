@@ -2,6 +2,8 @@
 // Uses 3.3V power from Arduino. DO NOT USE 5V output.
 #include <Wire.h>
 #include <VL53L0X.h>
+#include "MegunoLink.h"
+#include "Filter.h"
 VL53L0X sensor4;
 VL53L0X sensor5;
 VL53L0X sensor6;
@@ -21,6 +23,11 @@ VL53L0X Select(int index) {
   if (index == 7) { return sensor7; }
 }
 VL53L0X sensor;
+
+// Create a new exponential filter with a weight of 5 and an initial value of 0. 
+long FilterWeight = 20;
+ExponentialFilter<long> ADCFilter(FilterWeight, 0);
+
 void setup() {
   Serial.begin(9600);
   Wire.begin();
@@ -45,7 +52,7 @@ void setup() {
   }
 }
 
-void loop() {
+void loop() {  
   for (int index = 4; index < 8; index++) {
     TCA9548A(index);
     sensor = Select(index);
@@ -54,10 +61,15 @@ void loop() {
     Serial.print(": ");
     int reading = sensor.readRangeContinuousMillimeters();
     
-    if (reading < 1100){
+    if (reading < 8000){
+      ADCFilter.Filter(reading);
+      int filtered_reading = ADCFilter.Current();
       Serial.print("    ");
-      Serial.print(reading);
+      Serial.print(filtered_reading);
       Serial.print(" mm  ");
+      TimePlot Plot;
+      Plot.SendData("Raw", reading);
+      Plot.SendData("Filtered", filtered_reading);
       }
     else {Serial.print("OutOfRange  ");}
     
