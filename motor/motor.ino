@@ -25,7 +25,7 @@ void setup() {
 void loop() {
   setDirectionSpeed(1, 1, 50);
   delay(1000);
-  setDirectionSpeed(1, 2, 25);
+  setDirectionSpeed(1, 2, 50);
   delay(1000);
 }
 

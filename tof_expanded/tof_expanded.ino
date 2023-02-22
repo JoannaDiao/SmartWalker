@@ -27,6 +27,7 @@ VL53L0X sensor;
 // Create a new exponential filter with a weight of 5 and an initial value of 0. 
 long FilterWeight = 20;
 ExponentialFilter<long> ADCFilter(FilterWeight, 0);
+ExponentialFilter<long> ADCFilter1(FilterWeight, 0);
 
 void setup() {
   Serial.begin(9600);
@@ -52,8 +53,78 @@ void setup() {
   }
 }
 
+bool changed_significantly(double value) {
+    const float change_threshold = 7;   // cm
+    const float filter_constant = 0.1;  // this one also
+    static float old_value;
+    float delta = value - old_value;
+    bool changed = abs(delta) >= change_threshold;
+    if (changed)
+        old_value = value;
+    else
+        old_value += filter_constant * delta;  // low-pass filter, would detect creeping changes
+    return changed;
+}
+
 void loop() {  
-  for (int index = 4; index < 8; index++) {
+//  for (int index = 4; index < 8; index++) {
+//    TCA9548A(index);
+//    sensor = Select(index);
+//    Serial.print("Sensor");
+//    Serial.print(index);
+//    Serial.print(": ");
+//    int reading = sensor.readRangeContinuousMillimeters();
+//    
+//    if (reading < 8000){
+//      ADCFilter.Filter(reading);
+//      int filtered_reading = ADCFilter.Current();
+//      
+//      double cm_reading = filtered_reading/10.0;
+//      Serial.print("    ");
+//      
+//      Serial.print(reading);
+//      Serial.print(" cm  ");
+//
+////      if(changed_significantly(cm_reading)){
+////          Serial.print("Jump!");
+////      }
+////      TimePlot Plot;
+////      Plot.SendData("Filtered", filtered_reading);
+//      }
+//    else {Serial.print("OutOfRange  ");}
+//    
+//    if (sensor.timeoutOccurred()) { Serial.print(" TIMEOUT"); }
+//    delay(100);
+//  }
+
+    int index = 6;
+    TCA9548A(index);
+    sensor = Select(index);
+    Serial.print("Sensor");
+    Serial.print(index);
+    Serial.print(": ");
+    int reading_6 = sensor.readRangeContinuousMillimeters();
+    
+    if (reading_6 < 8000){
+      ADCFilter1.Filter(reading_6);
+      int filtered_reading_6 = ADCFilter1.Current();
+      
+      double cm_reading_6 = filtered_reading_6/10.0;
+      Serial.print("    ");
+      
+      Serial.print(cm_reading_6);
+      Serial.print(" cm  ");
+
+      if(changed_significantly(cm_reading_6)){
+          Serial.print("Jump!");
+        }
+      }
+    else {Serial.print("OutOfRange  ");}
+    
+    if (sensor.timeoutOccurred()) { Serial.print(" TIMEOUT"); }
+    delay(10);
+
+    index = 7;
     TCA9548A(index);
     sensor = Select(index);
     Serial.print("Sensor");
@@ -64,17 +135,21 @@ void loop() {
     if (reading < 8000){
       ADCFilter.Filter(reading);
       int filtered_reading = ADCFilter.Current();
+      
+      double cm_reading = filtered_reading/10.0;
       Serial.print("    ");
-      Serial.print(filtered_reading);
-      Serial.print(" mm  ");
-      TimePlot Plot;
-      Plot.SendData("Raw", reading);
-      Plot.SendData("Filtered", filtered_reading);
+      
+      Serial.print(cm_reading);
+      Serial.print(" cm  ");
+
+      if(changed_significantly(cm_reading)){
+          Serial.print("Jump!");
+        }
       }
     else {Serial.print("OutOfRange  ");}
     
     if (sensor.timeoutOccurred()) { Serial.print(" TIMEOUT"); }
     delay(10);
-  }
+  
   Serial.println();
 }
