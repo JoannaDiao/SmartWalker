@@ -1,6 +1,6 @@
 // https://electropeak.com/learn/connect-multiple-i2c-devices-to-arduino-using-i2c-multiplexer-tca9548a/
 // Uses 3.3V power from Arduino. DO NOT USE 5V output.
-#include "../sensors.h"
+#include "../sensors/sensors.h"
 
 VL53L0X Select(int index) {
   if (index == 4) { return sensor4; } // rear right TOF
@@ -29,13 +29,13 @@ void loop() {
   int dist2 = BL_TOF.getDistance();
   int dist3 = FL_TOF.getDistance();
   int dist4 = FR_TOF.getDistance();
-  Serial.print("    ");
+  Serial.print("    BR: ");
   Serial.print(dist1);
-  Serial.print(", ");
+  Serial.print(", BL: ");
   Serial.print(dist2);
-  Serial.print(", ");
+  Serial.print(", FL: ");
   Serial.print(dist3);
-  Serial.print(", ");
+  Serial.print(", FR: ");
   Serial.print(dist4);
   Serial.print(" mm  ");
   Serial.println();
