@@ -5,14 +5,13 @@ namespace Sensors {
         loxAddress = bus;
     }
 
-    TOF::init() {
+    void TOF::init() {
         TCA9548A(loxAddress);
         sensor.setTimeout(100);
         if (!sensor.init()) {
         Serial.println("Failed to detect and initialize sensor!");
         while (1) {} // either terminate or do something else here
         }
-        ADCFilter(FilterWeight, 0);
 
         // Start continuous back-to-back mode (take readings as
         // fast as possible).  To use continuous timed mode

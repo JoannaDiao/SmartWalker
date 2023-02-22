@@ -12,7 +12,6 @@ namespace Sensors {
         TOF(uint8_t bus);
         void init();
         int getDistance();
-        uint16_t shutdownPin;
         
     private:
         void TCA9548A(uint8_t bus)  // function of TCA9548A
@@ -25,7 +24,7 @@ namespace Sensors {
         uint8_t loxAddress;
         VL53L0X sensor;
         long FilterWeight = 20;
-        ExponentialFilter<long> ADCFilter;
+        ExponentialFilter<long> ADCFilter{ExponentialFilter<long>(FilterWeight, 0)};
         int distance_;
     };
 } // namespace Sensors
