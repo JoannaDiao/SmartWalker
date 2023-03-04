@@ -26,8 +26,29 @@ void loop() {
   // motor, direction, speed
   // motor 1: direct 1 -> fwd, direct 2 -> bckwd
   // motor 2: direct 2 -> fwd, direct 1 -> bckwd
-  setDirectionSpeed(1, 1, 40); // right
-  setDirectionSpeed(2, 2, 40); // left 
+  turn_right(60);
+}
+
+void turn_right(int speed) {
+  if(speed > 60){ speed = 60;}
+  
+  setDirectionSpeed(1, 2, 30); // right backwards
+  setDirectionSpeed(2, 2, speed); // left 
+  delay(100);
+}
+
+void turn_left() {
+  
+  setDirectionSpeed(1, 1, 60); // right
+  setDirectionSpeed(2, 2, 0); // left 
+  delay(100);
+}
+
+void go_straight(int speed) {
+  if(speed > 60){ speed = 60;}
+  
+  setDirectionSpeed(1, 1, speed); // right
+  setDirectionSpeed(2, 2, speed); // left 
   delay(100);
 }
 

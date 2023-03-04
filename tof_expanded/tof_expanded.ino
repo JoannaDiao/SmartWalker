@@ -66,6 +66,17 @@ bool changed_significantly(double value) {
     return changed;
 }
 
+bool sitting_down(double value) {
+    
+
+
+
+
+    
+    
+    return changed;
+}
+
 void loop() {  
 //  for (int index = 4; index < 8; index++) {
 //    TCA9548A(index);
@@ -97,7 +108,7 @@ void loop() {
 //    delay(100);
 //  }
 
-    int index = 6;
+    int index = 5; // 5 is rear left
     TCA9548A(index);
     sensor = Select(index);
     Serial.print("Sensor");
@@ -124,7 +135,7 @@ void loop() {
     if (sensor.timeoutOccurred()) { Serial.print(" TIMEOUT"); }
     delay(10);
 
-    index = 7;
+    index = 4; // 4 is rear right 
     TCA9548A(index);
     sensor = Select(index);
     Serial.print("Sensor");
