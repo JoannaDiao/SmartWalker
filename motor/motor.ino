@@ -23,10 +23,12 @@ void setup() {
 }
 
 void loop() {
-  setDirectionSpeed(1, 1, 50);
-  delay(1000);
-  setDirectionSpeed(1, 2, 50);
-  delay(1000);
+  // motor, direction, speed
+  // motor 1: direct 1 -> fwd, direct 2 -> bckwd
+  // motor 2: direct 2 -> fwd, direct 1 -> bckwd
+  setDirectionSpeed(1, 1, 40); // right
+  setDirectionSpeed(2, 2, 40); // left 
+  delay(100);
 }
 
 void setDirectionSpeed(int motor, int dir, int speedPercentage) {
