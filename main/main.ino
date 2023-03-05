@@ -18,22 +18,57 @@ Sensors::TOF BL_TOF(5); // rear left TOF
 Sensors::TOF FL_TOF(6); // front left TOF
 Sensors::TOF FR_TOF(7); // front right TOF
 
+Sensors::Grip left_grip(42, 44);
+// Sensors::Grip right_grip(46, 48);
+
 const int TURN_MOTOR_VALUE = 60;
 const int STOP_MOTOR_VALUE = 0;
+const int LONG_BRAKE_TIME = 10000;
+const int SHORT_BRAKE_TIME = 5000;
 
 void setState(robot_state_t new_state) {
   robot_state = new_state;
 }
 
-bool userWantsToSit() {
-  // if user is touching the grip && back facing TOF distance decrease below a certain threshold
-    // return true
-  // else
-    // return false
+bool sittingDetected() {
+  double bl_dist = BL_TOF.getDistance();
+  double br_dist = BR_TOF.getDistance();
+  bool sitting = false;
+  if (bl_dist == -1 || br_dist == -1) {
+    sitting = false;
+    return sitting;
+  } 
+  
+  if (bl_dist < 20 && br_dist < 20) {
+    sitting = true;
+  } 
+  
+  return sitting;
 }
 
-void brake() {
-  // 
+bool userWantsToSit() {
+  // if user is touching the grip && back facing TOF distance decrease below a certain threshold --> user wants to sit down
+  if (left_grip.handleEngaged() && sittingDetected()) {
+    return true;
+  }
+  return false;
+}
+
+void Brake() {
+  for (pos = 80; pos <= 180; pos += 1) { // goes from 0 degrees to 180 degrees in steps of 1 degree
+    myservo.write(pos);
+    delay(15); // waits 15ms for the servo to reach the position
+  }
+}
+
+void handleLongBrake() {
+  Brake();
+  delay(LONG_BRAKE_TIME);
+}
+
+void handleShortBrake() {
+  Brake();
+  delay(SHORT_BRAKE_TIME);
 }
 
 void handleInit() {
@@ -87,16 +122,6 @@ void handleAssistRightTurn() {
   setState(NO_INTERFERENCE);
 }
 
-void handleShortBrake() {
-  brake();
-  delay(5000);
-}
-
-void handleLongBrake() {
-  brake();
-  delay(10000);
-}
-
 void setup() {
     Serial.begin(9600);
     Wire.begin();
@@ -132,8 +157,11 @@ void loop() {
     case ASSIST_RIGHT_TURN:
       handleAssistRightTurn();
       break;
-    case BRAKE:
-      handleBrake();
+    case SHORT_BRAKE:
+      handleShortBrake();
+      break;
+    case LONG_BRAKE:
+      handleLongBrake();
       break;
   }
 
