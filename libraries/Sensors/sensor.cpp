@@ -9,9 +9,10 @@ namespace Sensors {
         TCA9548A(loxAddress);
         sensor.setTimeout(100);
         if (!sensor.init()) {
-        Serial.println("Failed to detect and initialize sensor!");
-        while (1) {} // either terminate or do something else here
+            Serial.println("Failed to detect and initialize sensor!");
+            while (1) {} // either terminate or do something else here
         }
+        Serial.println("TOF initialized!");
 
         // Start continuous back-to-back mode (take readings as
         // fast as possible).  To use continuous timed mode
@@ -20,7 +21,8 @@ namespace Sensors {
         sensor.startContinuous();
     }
 
-    int TOF::getDistance() {
+    double TOF::getDistance() {
+        TCA9548A(loxAddress);
         int reading = sensor.readRangeContinuousMillimeters();
         if (reading < 8000) {
             ADCFilter.Filter(reading);
@@ -31,7 +33,7 @@ namespace Sensors {
             //   TimePlot Plot;
             //   Plot.SendData("Raw", reading);
             //   Plot.SendData("Filtered", filtered_reading);
-            distance_ = filtered_reading;
+            distance_ = filtered_reading / 100.0;
         }
         else {
             Serial.print("OutOfRange  ");
@@ -44,5 +46,18 @@ namespace Sensors {
         }
 
         return distance_;
+    }
+
+    bool TOF::objectDetected() {
+        Serial.print("yo");
+        double curr_reading = getDistance();
+        const double filter_constant = 0.1;  // cm
+        double delta = curr_reading - prev_distance_;
+        bool changed = abs(delta) >= change_threshold;
+        if (changed)
+            prev_distance_ = curr_reading;
+        else
+            prev_distance_ += filter_constant * delta;  // low-pass filter, would detect creeping changes
+        return changed;
     }
 } // namespace Sensors

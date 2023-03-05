@@ -11,7 +11,8 @@ namespace Sensors {
     public:
         TOF(uint8_t bus);
         void init();
-        int getDistance();
+        double getDistance();
+        bool objectDetected();
         
     private:
         void TCA9548A(uint8_t bus)  // function of TCA9548A
@@ -25,7 +26,9 @@ namespace Sensors {
         VL53L0X sensor;
         long FilterWeight = 20;
         ExponentialFilter<long> ADCFilter{ExponentialFilter<long>(FilterWeight, 0)};
-        int distance_;
+        double distance_;
+        double prev_distance_ = getDistance();
+        const double change_threshold = 7.0;   // cm
     };
 } // namespace Sensors
 
