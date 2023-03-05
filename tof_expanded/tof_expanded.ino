@@ -32,7 +32,7 @@ ExponentialFilter<long> ADCFilter1(FilterWeight, 0);
 void setup() {
   Serial.begin(9600);
   Wire.begin();
-  delay(100);
+  delay(1000);
 
   for (int index = 4; index < 8; index++) {
     TCA9548A(index);
@@ -66,15 +66,18 @@ bool changed_significantly(double value) {
     return changed;
 }
 
-bool sitting_down(double value) {
+bool sitting_down(double value_left, double value_right) {
+    bool sitting = false;
+    if(value_left == -1 || value_right == -1){
+      sitting = false;
+      return sitting;
+    } 
     
-
-
-
-
+    if(value_left < 20 && value_right < 20){
+      sitting = true;
+    } 
     
-    
-    return changed;
+    return sitting;
 }
 
 void loop() {  
@@ -108,13 +111,15 @@ void loop() {
 //    delay(100);
 //  }
 
-    int index = 5; // 5 is rear left
+    int index = 5; // 5 is rear left, 6 is front left
     TCA9548A(index);
     sensor = Select(index);
-    Serial.print("Sensor");
-    Serial.print(index);
+    Serial.print("left");
+   // Serial.print(index);
     Serial.print(": ");
     int reading_6 = sensor.readRangeContinuousMillimeters();
+
+    int dist_left = -1;
     
     if (reading_6 < 8000){
       ADCFilter1.Filter(reading_6);
@@ -126,22 +131,26 @@ void loop() {
       Serial.print(cm_reading_6);
       Serial.print(" cm  ");
 
-      if(changed_significantly(cm_reading_6)){
-          Serial.print("Jump!");
-        }
+      dist_left = cm_reading_6;
+
+//      if(changed_significantly(cm_reading_6)){
+//          Serial.print("Obstacle in the way!");
+//        }
       }
     else {Serial.print("OutOfRange  ");}
     
     if (sensor.timeoutOccurred()) { Serial.print(" TIMEOUT"); }
     delay(10);
-
-    index = 4; // 4 is rear right 
+    
+    index = 4; // 4 is rear right, 7 is front right 
     TCA9548A(index);
     sensor = Select(index);
-    Serial.print("Sensor");
-    Serial.print(index);
+    Serial.print("right");
+   // Serial.print(index);
     Serial.print(": ");
     int reading = sensor.readRangeContinuousMillimeters();
+
+    int dist_right = -1;
     
     if (reading < 8000){
       ADCFilter.Filter(reading);
@@ -153,12 +162,18 @@ void loop() {
       Serial.print(cm_reading);
       Serial.print(" cm  ");
 
-      if(changed_significantly(cm_reading)){
-          Serial.print("Jump!");
-        }
+      dist_right = cm_reading;
+
+//      if(changed_significantly(cm_reading)){
+//          Serial.print("Obstacle in the way!");
+//        }
       }
     else {Serial.print("OutOfRange  ");}
-    
+
+    if(sitting_down(dist_left, dist_right)){
+          Serial.print("Sitting!");
+        }
+
     if (sensor.timeoutOccurred()) { Serial.print(" TIMEOUT"); }
     delay(10);
   
