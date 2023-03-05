@@ -8,9 +8,11 @@ namespace Sensors {
     void TOF::init() {
         TCA9548A(loxAddress);
         sensor.setTimeout(100);
-        if (!sensor.init()) {
+        int retry = 0;
+        while (!sensor.init() && retry < 5) {
             Serial.println("Failed to detect and initialize sensor!");
-            while (1) {} // either terminate or do something else here
+            retry++;
+            delay(100);
         }
 
         // Start continuous back-to-back mode (take readings as
@@ -61,5 +63,18 @@ namespace Sensors {
         else
             prev_distance_ += filter_constant * delta;  // low-pass filter, would detect creeping changes
         return changed;
+    }
+
+    bool Grip::handleEngaged() {
+        long curr_reading = getReading();
+        // Serial.print("Grip reading: ");
+        // Serial.print(curr_reading);
+        // Serial.print(" ");
+        bool handle_engaged = false;
+        if (curr_reading > 6000) {
+            handle_engaged = true;
+            return handle_engaged;
+        }
+        return handle_engaged;
     }
 } // namespace Sensors

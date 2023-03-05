@@ -1,10 +1,13 @@
 #ifndef SENSORS_H
 #define SENSORS_H
 
+// Libraries for TOF sensors
 #include <Wire.h>
 #include <VL53L0X.h>
 #include "MegunoLink.h"
 #include "Filter.h"
+// Library for hand grip
+#include <CapacitiveSensor.h>
 
 namespace Sensors {
     class TOF {
@@ -29,6 +32,23 @@ namespace Sensors {
         double distance_;
         double prev_distance_ = -1;
         const double change_threshold = 7.0;   // cm
+    };
+
+    class Grip {
+    public:
+        Grip(uint8_t pin1, uint8_t pin2) {
+            grip_ = CapacitiveSensor(pin1, pin2);
+            // turn off autocalibrate on channel 1 - just as an example
+            grip_.set_CS_AutocaL_Millis(0xFFFFFFFF);
+        }
+        bool handleEngaged();
+
+    private:
+        inline long getReading() {
+            return grip_.capacitiveSensor(n_measurements_);
+        }
+        CapacitiveSensor grip_ = CapacitiveSensor(0, 0);
+        int n_measurements_ = 30;
     };
 } // namespace Sensors
 

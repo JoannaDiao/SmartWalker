@@ -64,11 +64,13 @@ void Brake() {
 void handleLongBrake() {
   Brake();
   delay(LONG_BRAKE_TIME);
+  setState(NO_INTERFERENCE);
 }
 
 void handleShortBrake() {
   Brake();
   delay(SHORT_BRAKE_TIME);
+  setState(NO_INTERFERENCE);
 }
 
 void handleInit() {
