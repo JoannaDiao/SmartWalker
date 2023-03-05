@@ -27,7 +27,7 @@ namespace Sensors {
         long FilterWeight = 20;
         ExponentialFilter<long> ADCFilter{ExponentialFilter<long>(FilterWeight, 0)};
         double distance_;
-        double prev_distance_ = getDistance();
+        double prev_distance_ = -1;
         const double change_threshold = 7.0;   // cm
     };
 } // namespace Sensors

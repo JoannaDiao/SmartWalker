@@ -12,7 +12,6 @@ namespace Sensors {
             Serial.println("Failed to detect and initialize sensor!");
             while (1) {} // either terminate or do something else here
         }
-        Serial.println("TOF initialized!");
 
         // Start continuous back-to-back mode (take readings as
         // fast as possible).  To use continuous timed mode
@@ -33,7 +32,7 @@ namespace Sensors {
             //   TimePlot Plot;
             //   Plot.SendData("Raw", reading);
             //   Plot.SendData("Filtered", filtered_reading);
-            distance_ = filtered_reading / 100.0;
+            distance_ = filtered_reading / 10.0;
         }
         else {
             Serial.print("OutOfRange  ");
@@ -49,9 +48,12 @@ namespace Sensors {
     }
 
     bool TOF::objectDetected() {
-        Serial.print("yo");
         double curr_reading = getDistance();
         const double filter_constant = 0.1;  // cm
+        if (prev_distance_ == -1) {
+            prev_distance_ = curr_reading;
+            return false;
+        }
         double delta = curr_reading - prev_distance_;
         bool changed = abs(delta) >= change_threshold;
         if (changed)
