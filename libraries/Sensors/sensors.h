@@ -17,7 +17,7 @@ namespace Sensors
         TOF(uint8_t bus);
         void init();
         double getDistance();
-        bool objectDetected(double floor_value);
+        bool objectDetected();
 
     private:
         void TCA9548A(uint8_t bus) // function of TCA9548A
@@ -42,7 +42,7 @@ namespace Sensors
         Grip(uint8_t pin1, uint8_t pin2)
         {
             grip_ = CapacitiveSensor(pin1, pin2);
-            // turn off autocalibrate on channel 1 - just as an example
+            // turn off autocalibrat\e on channel 1 - just as an example
             grip_.set_CS_AutocaL_Millis(0xFFFFFFFF);
         }
         bool handleEngaged();
@@ -54,6 +54,26 @@ namespace Sensors
         }
         CapacitiveSensor grip_ = CapacitiveSensor(0, 0);
         int n_measurements_ = 30;
+    };
+
+    class Motor
+    {
+    public:
+        Motor(int IN1, int IN2, int EN)
+        {
+            forward_pin_ = IN1;
+            backward_pin_ = IN2;
+            enable_pin_ = EN;
+        }
+        void init();
+        void forward(int speed);
+        void stop();
+
+    private:
+        // void setDirectionSpeed();
+        int forward_pin_;
+        int backward_pin_;
+        int enable_pin_;
     };
 } // namespace Sensors
 

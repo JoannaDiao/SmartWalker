@@ -57,11 +57,21 @@ namespace Sensors
         return distance_;
     }
 
-    bool TOF::objectDetected(double floor_value)
+    bool TOF::objectDetected()
     {
         double curr_reading = getDistance();
-        double delta = floor_value - curr_reading;
+        const double filter_constant = 0.1; // cm
+        if (prev_distance_ == -1)
+        {
+            prev_distance_ = curr_reading;
+            return false;
+        }
+        double delta = curr_reading - prev_distance_;
         bool changed = abs(delta) >= change_threshold;
+        if (changed)
+            prev_distance_ = curr_reading;
+        else
+            prev_distance_ += filter_constant * delta; // low-pass filter, would detect creeping changes
         return changed;
     }
 
@@ -78,5 +88,30 @@ namespace Sensors
             return handle_engaged;
         }
         return handle_engaged;
+    }
+
+    void Motor::init()
+    {
+        pinMode(enable_pin_, OUTPUT);
+        pinMode(forward_pin_, OUTPUT);
+        pinMode(backward_pin_, OUTPUT);
+
+        digitalWrite(forward_pin_, LOW);
+        digitalWrite(backward_pin_, LOW);
+    }
+
+    void Motor::forward(int speed)
+    {
+        digitalWrite(forward_pin_, HIGH);
+        digitalWrite(backward_pin_, LOW);
+        int speed_input = speed / 100.0 * 255;
+        analogWrite(enable_pin_, speed_input);
+    }
+
+    void Motor::stop()
+    {
+        analogWrite(enable_pin_, 255); // double check the stopping values for motors
+        digitalWrite(forward_pin_, LOW);
+        digitalWrite(backward_pin_, LOW);
     }
 } // namespace Sensors

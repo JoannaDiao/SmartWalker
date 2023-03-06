@@ -61,15 +61,24 @@ void Brake() {
   }
 }
 
+void Unbrake() {
+  for (pos = 180; pos >= 80; pos -= 1) { // goes from 180 degrees to 0 degrees
+    myservo.write(pos);
+    delay(15); // waits 15ms for the servo to reach the position
+  }
+}
+
 void handleLongBrake() {
   Brake();
   delay(LONG_BRAKE_TIME);
+  Unbrake();
   setState(NO_INTERFERENCE);
 }
 
 void handleShortBrake() {
   Brake();
   delay(SHORT_BRAKE_TIME);
+  Unbrake();
   setState(NO_INTERFERENCE);
 }
 
