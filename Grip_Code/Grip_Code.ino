@@ -1,57 +1,62 @@
-#include <CapacitiveSensor.h>
+#include <sensors.h>
 
-/*
- * CapitiveSense Library Demo Sketch
- * Paul Badger 2008
- * Uses a high value resistor e.g. 10M between send pin and receive pin
- * Resistor effects sensitivity, experiment with values, 50K - 50M. Larger resistor values yield larger sensor values.
- * Receive pin is the sensor pin - try different amounts of foil/metal on this pin
- */
+Sensors::Grip left_grip(42, 44);
+Sensors::TOF BR_TOF(4); // rear right TOF
+Sensors::TOF BL_TOF(5); // rear left TOF
+Sensors::TOF FL_TOF(6); // front left TOF
+Sensors::TOF FR_TOF(7); // front right TOF
 
+bool sittingDetected() {
+  double bl_dist = BL_TOF.getDistance();
+  double br_dist = BR_TOF.getDistance();
+//  Serial.print("BL: ");
+//  Serial.print(bl_dist);
+//  Serial.print("BR: ");
+//  Serial.print(br_dist);
+//  Serial.println();
+  bool sitting = false;
+  if (bl_dist == -1 || br_dist == -1) {
+    sitting = false;
+    return sitting;
+  } 
+  
+  if (bl_dist < 20 && br_dist < 20) {
+    sitting = true;
+  } 
+  
+  return sitting;
+}
 
-CapacitiveSensor   cs_4_2 = CapacitiveSensor(42,44);        // 10M resistor between pins 4 & 2, pin 2 is sensor pin, add a wire and or foil if desired
-//CapacitiveSensor   cs_4_6 = CapacitiveSensor(46,48);        // 10M resistor between pins 4 & 6, pin 6 is sensor pin, add a wire and or foil
-//CapacitiveSensor   cs_4_8 = CapacitiveSensor(4,8);        // 10M resistor between pins 4 & 8, pin 8 is sensor pin, add a wire and or foil
+bool userWantsToSit() {
+  // if user is touching the grip && back facing TOF distance decrease below a certain threshold --> user wants to sit down
+  bool g = left_grip.handleEngaged();
+  bool s = sittingDetected();
+  if (g&&s) {
+    return true;
+  }
+  return false;
+}
+
 
 void setup()                    
 {
-//     cs_4_2.reset_CS_AutoCal(); 
-//     cs_4_6.reset_CS_AutoCal();     
-     
-     // turn off autocalibrate on channel 1 - just as an example
-   cs_4_2.set_CS_AutocaL_Millis(0xFFFFFFFF);
-//   cs_4_6.set_CS_AutocaL_Millis(0xFFFFFFFF);     // turn off autocalibrate on channel 1 - just as an example
-   Serial.begin(9600);
-}
+  Serial.begin(9600);
+  Wire.begin();
+  delay(1000);
 
-bool handle_engaged(int reading){
-  bool handle_engaged = false;
-  if(reading> 6000){
-    handle_engaged = true;
-  } 
-  else{
-    handle_engaged = false;
-  }
-  return handle_engaged;
+  BR_TOF.init();
+  BL_TOF.init();
+  FL_TOF.init();
+  FR_TOF.init();
 }
 
 void loop()                    
 {
-    long start = millis();
-    long total1 =  cs_4_2.capacitiveSensor(30);
-//    long total2 =  cs_4_6.capacitiveSensor(20);
-    //long total3 =  cs_4_8.capacitiveSensor(30);
-
-    bool grip_engaged = handle_engaged(total1);
-
-    //Serial.print(millis() - start);        // check on performance in milliseconds
-    //Serial.print("\t");                    // tab character for debug windown spacing
-    Serial.print("  handle_reading:  ");
-    Serial.print(total1);                  // print sensor output 1
-    Serial.print(", engaged?:  ");
-    Serial.print(grip_engaged);                  // print sensor output 2
-    Serial.print('\n');     
-    //Serial.println(total3);                // print sensor output 3
-
-    delay(1000);                             // arbitrary delay to limit data to serial port 
+    if (userWantsToSit()) {
+      Serial.println("User wants to sit!");
+    } else {
+//      Serial.println("No sitting!");
+    }
+//    sittingDetected();
+    delay(500);
 }
