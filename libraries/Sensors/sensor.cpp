@@ -1,15 +1,19 @@
 #include "sensors.h"
 
-namespace Sensors {
-    TOF::TOF(uint8_t bus) {
+namespace Sensors
+{
+    TOF::TOF(uint8_t bus)
+    {
         loxAddress = bus;
     }
 
-    void TOF::init() {
+    void TOF::init()
+    {
         TCA9548A(loxAddress);
         sensor.setTimeout(100);
         int retry = 0;
-        while (!sensor.init() && retry < 5) {
+        while (!sensor.init() && retry < 5)
+        {
             Serial.println("Failed to detect and initialize sensor!");
             retry++;
             delay(100);
@@ -22,10 +26,12 @@ namespace Sensors {
         sensor.startContinuous();
     }
 
-    double TOF::getDistance() {
+    double TOF::getDistance()
+    {
         TCA9548A(loxAddress);
         int reading = sensor.readRangeContinuousMillimeters();
-        if (reading < 8000) {
+        if (reading < 8000)
+        {
             ADCFilter.Filter(reading);
             int filtered_reading = ADCFilter.Current();
             //   Serial.print("    ");
@@ -36,12 +42,14 @@ namespace Sensors {
             //   Plot.SendData("Filtered", filtered_reading);
             distance_ = filtered_reading / 10.0;
         }
-        else {
+        else
+        {
             Serial.print("OutOfRange  ");
             distance_ = -1;
         }
-        
-        if (sensor.timeoutOccurred()) { 
+
+        if (sensor.timeoutOccurred())
+        {
             Serial.print("TIMEOUT");
             distance_ = -1;
         }
@@ -49,29 +57,23 @@ namespace Sensors {
         return distance_;
     }
 
-    bool TOF::objectDetected() {
+    bool TOF::objectDetected(double floor_value)
+    {
         double curr_reading = getDistance();
-        const double filter_constant = 0.1;  // cm
-        if (prev_distance_ == -1) {
-            prev_distance_ = curr_reading;
-            return false;
-        }
-        double delta = curr_reading - prev_distance_;
+        double delta = floor_value - curr_reading;
         bool changed = abs(delta) >= change_threshold;
-        if (changed)
-            prev_distance_ = curr_reading;
-        else
-            prev_distance_ += filter_constant * delta;  // low-pass filter, would detect creeping changes
         return changed;
     }
 
-    bool Grip::handleEngaged() {
+    bool Grip::handleEngaged()
+    {
         long curr_reading = getReading();
         // Serial.print("Grip reading: ");
         // Serial.print(curr_reading);
         // Serial.print(" ");
         bool handle_engaged = false;
-        if (curr_reading > 6000) {
+        if (curr_reading > 6000)
+        {
             handle_engaged = true;
             return handle_engaged;
         }
