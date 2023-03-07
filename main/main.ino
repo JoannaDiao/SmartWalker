@@ -1,3 +1,4 @@
+#include <Servo.h>
 #include <sensors.h>
 
 typedef enum {
@@ -12,16 +13,26 @@ typedef enum {
 robot_state_t robot_state = INIT;
 int left_motor_power = 0;
 int right_motor_power = 0;
+double FL_floor_avg;
+double FR_floor_avg;
 
 Sensors::TOF BR_TOF(4); // rear right TOF
 Sensors::TOF BL_TOF(5); // rear left TOF
 Sensors::TOF FL_TOF(6); // front left TOF
 Sensors::TOF FR_TOF(7); // front right TOF
 
-double FL_floor_avg;
-double FR_floor_avg;
+int ENA = 7;
+int IN1 = 6;
+int IN2 = 5;
+int IN3 = 4;
+int IN4 = 3;
+int ENB = 2;
+Sensors::Motor left_motor(IN4, IN3, ENB);
+Sensors::Motor right_motor(IN1, IN2, ENA);
 
-Sensors::Grip left_grip(42, 44);
+Servo servo;
+
+Sensors::Grip left_grip(44);
 // Sensors::Grip right_grip(46, 48);
 
 const int TURN_MOTOR_VALUE = 60;
@@ -33,7 +44,7 @@ void setState(robot_state_t new_state) {
   robot_state = new_state;
 }
 
-void get_floor_readings(){
+void floorCalibration(){
   double left_sum = 0;
   double right_sum = 0;
   for (int i = 0; i < 50; i++){
@@ -77,20 +88,23 @@ bool userWantsToSit() {
 }
 
 void Brake() {
-  for (pos = 80; pos <= 180; pos += 1) { // goes from 0 degrees to 180 degrees in steps of 1 degree
-    myservo.write(pos);
-    delay(15); // waits 15ms for the servo to reach the position
-  }
+  Serial.println("braking!");
+//  for (int pos = 80; pos <= 180; pos += 1) { // goes from 0 degrees to 180 degrees in steps of 1 degree
+//    servo.write(pos);
+//    delay(15); // waits 15ms for the servo to reach the position
+//  }
 }
 
 void Unbrake() {
-  for (pos = 180; pos >= 80; pos -= 1) { // goes from 180 degrees to 0 degrees
-    myservo.write(pos);
-    delay(15); // waits 15ms for the servo to reach the position
-  }
+  Serial.println("unbraking!");
+//  for (int pos = 180; pos >= 80; pos -= 1) { // goes from 180 degrees to 0 degrees
+//    servo.write(pos);
+//    delay(15); // waits 15ms for the servo to reach the position
+//  }
 }
 
 void handleLongBrake() {
+  Serial.println("handleLongBrake");
   Brake();
   delay(LONG_BRAKE_TIME);
   Unbrake();
@@ -98,6 +112,7 @@ void handleLongBrake() {
 }
 
 void handleShortBrake() {
+  Serial.println("handleShortBrake");
   Brake();
   delay(SHORT_BRAKE_TIME);
   Unbrake();
@@ -109,7 +124,19 @@ void handleInit() {
   BL_TOF.init();
   FL_TOF.init();
   FR_TOF.init();
+  left_motor.init();
+  right_motor.init();
+  servo.attach(8);
+  delay(500);
   // TODO: check to see if the TOFs are properly initialized
+
+  Serial.println("handleInit");
+  floorCalibration();
+  Serial.print("left floor: ");
+  Serial.print(FL_floor_avg);
+  Serial.print("right floor: ");
+  Serial.print(FR_floor_avg);
+  Serial.println();
   setState(NO_INTERFERENCE);
 }
 
@@ -119,14 +146,18 @@ void handleNoInterference() {
   // check if any obstacles in front of either of the front TOFs
   // determine if assist turns or short brake are needed
   if (userWantsToSit()) {
+    Serial.println("USER WANTS TO SIT");
     setState(LONG_BRAKE);
     return;
   }
   if (FL_TOF.objectDetected(FL_floor_avg) && FR_TOF.objectDetected(FR_floor_avg)) {
+    Serial.println("obstacle on both sides!");
     setState(SHORT_BRAKE);
   } else if (FL_TOF.objectDetected(FL_floor_avg)) {
+    Serial.println("obstacle on left side!");
     setState(ASSIST_RIGHT_TURN);
   } else if (FR_TOF.objectDetected(FR_floor_avg)) {
+    Serial.println("obstacle on right side!");
     setState(ASSIST_LEFT_TURN);
   }
   // state remains to be no interference
@@ -135,12 +166,21 @@ void handleNoInterference() {
 
 void handleAssistLeftTurn() {
   // turn until we stop seeing the obstacle
+
   right_motor_power = TURN_MOTOR_VALUE;
   left_motor_power = STOP_MOTOR_VALUE;
   while (FR_TOF.objectDetected(FR_floor_avg)) {
-    commandMotor(left_motor_power, right_motor_power);
+    // commandMotor(left_motor_power, right_motor_power);
+    double fr = FR_TOF.getDistance();
+    double fl = FL_TOF.getDistance();
     Serial.print("Left turn!");
+    Serial.print(" FR: ");
+    Serial.print(fr);
+    Serial.print(" FL: ");
+    Serial.print(fl);
+    Serial.println();
   }
+  Serial.println("Left turn finished!");
   setState(NO_INTERFERENCE);
 }
 
@@ -149,20 +189,19 @@ void handleAssistRightTurn() {
   right_motor_power = STOP_MOTOR_VALUE;
   left_motor_power = TURN_MOTOR_VALUE;
   while (FL_TOF.objectDetected(FL_floor_avg)) {
-    commandMotor(left_motor_power, right_motor_power);
-    Serial.print("Right turn!");
+    // commandMotor(left_motor_power, right_motor_power);
+    Serial.println("Right turn!");
   }
+  Serial.println("Right turn finished!");
   setState(NO_INTERFERENCE);
 }
 
 void setup() {
     Serial.begin(9600);
     Wire.begin();
-    delay(100);
+    delay(1000);
 
-    handleInit();
-
-    get_floor_readings();
+    robot_state = INIT;
 }
 
 void loop() {  

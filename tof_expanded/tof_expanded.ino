@@ -10,14 +10,16 @@ Sensors::TOF FR_TOF(7); // front right TOF
 double FL_floor_avg;
 double FR_floor_avg;
 
+int i = 0;
+
 void get_floor_readings(){
   double left_sum = 0;
   double right_sum = 0;
-  for (int i = 0; i < 50; i++){
+  for (int i = 0; i < 100; i++){
     double left_dist = FL_TOF.getDistance();
     double right_dist = FR_TOF.getDistance();
     
-    if( i >= 25){
+    if( i >= 75){
       right_sum += right_dist;
       left_sum += left_dist;
     }
@@ -30,7 +32,7 @@ void get_floor_readings(){
 void setup() {
   Serial.begin(9600);
   Wire.begin();
-  delay(5000);
+  delay(1000);
 
   BR_TOF.init();
   BL_TOF.init();
@@ -60,6 +62,20 @@ void loop() {
 //    Serial.println();
 //    Serial.print(" cm  ");
 //    Serial.println();
+  if (i == 0) {
+    i++;
+    Serial.print("FL_floor_avg: ");
+    Serial.print(FL_floor_avg);
+    Serial.print("FR_floor_avg");
+    Serial.print(FR_floor_avg);
+  }
+  double fr = FR_TOF.getDistance();
+  double fl = FL_TOF.getDistance();
+  Serial.print(" FR: ");
+  Serial.print(fr);
+  Serial.print(" FL: ");
+  Serial.print(fl);
+  Serial.println();
  
   if (FR_TOF.objectDetected(FR_floor_avg) && FL_TOF.objectDetected(FL_floor_avg)) {
     Serial.println("both!");
