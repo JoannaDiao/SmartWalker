@@ -68,7 +68,9 @@ bool sittingDetected() {
 
 bool userWantsToSit() {
   // if user is touching the grip && back facing TOF distance decrease below a certain threshold --> user wants to sit down
-  if (left_grip.handleEngaged() && sittingDetected()) {
+  bool g = left_grip.handleEngaged();
+  bool s = sittingDetected();
+  if (g&&s) {
     return true;
   }
   return false;
