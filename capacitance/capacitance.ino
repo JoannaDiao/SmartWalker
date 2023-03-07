@@ -1,6 +1,6 @@
 #include <sensors.h>
 
-//Sensors::Grip left_grip(42, 44);
+Sensors::Grip left_grip(44);
 Sensors::TOF BR_TOF(4); // rear right TOF
 Sensors::TOF BL_TOF(5); // rear left TOF
 Sensors::TOF FL_TOF(6); // front left TOF
@@ -39,8 +39,8 @@ bool handleEngaged(int cap_level){
 
 bool userWantsToSit() {
   // if user is touching the grip && back facing TOF distance decrease below a certain threshold --> user wants to sit down
-  int capacitance = readCapacitance(44);
-  bool g = handleEngaged(capacitance);
+  //int capacitance = readCapacitance(44);
+  bool g = left_grip.handleEngaged();
   bool s = sittingDetected();
   if (g && s) {
     return true;

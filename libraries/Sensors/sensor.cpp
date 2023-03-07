@@ -65,19 +65,23 @@ namespace Sensors
         return changed;
     }
 
+    Grip::Grip(uint8_t pin)
+    {
+        pinToMeasure = pin;
+    }
+
     bool Grip::handleEngaged()
     {
-        long curr_reading = getReading();
+        long curr_reading = readCapacitance();
         // Serial.print("Grip reading: ");
         // Serial.print(curr_reading);
         // Serial.print(" ");
-        bool handle_engaged = false;
-        if (curr_reading > 6000)
+
+        if (curr_reading >= 6)
         {
-            handle_engaged = true;
-            return handle_engaged;
+            return true;
         }
-        return handle_engaged;
+        return false;
     }
 
     void Motor::init()
