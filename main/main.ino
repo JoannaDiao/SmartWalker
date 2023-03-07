@@ -18,6 +18,9 @@ Sensors::TOF BL_TOF(5); // rear left TOF
 Sensors::TOF FL_TOF(6); // front left TOF
 Sensors::TOF FR_TOF(7); // front right TOF
 
+double FL_floor_avg;
+double FR_floor_avg;
+
 Sensors::Grip left_grip(42, 44);
 // Sensors::Grip right_grip(46, 48);
 
@@ -28,6 +31,23 @@ const int SHORT_BRAKE_TIME = 5000;
 
 void setState(robot_state_t new_state) {
   robot_state = new_state;
+}
+
+void get_floor_readings(){
+  double left_sum = 0;
+  double right_sum = 0;
+  for (int i = 0; i < 50; i++){
+    double left_dist = FL_TOF.getDistance();
+    double right_dist = FR_TOF.getDistance();
+    
+    if( i >= 25){
+      right_sum += right_dist;
+      left_sum += left_dist;
+    }
+   }
+
+   FL_floor_avg = left_sum/25;
+   FR_floor_avg = right_sum/25;
 }
 
 bool sittingDetected() {
@@ -100,11 +120,11 @@ void handleNoInterference() {
     setState(LONG_BRAKE);
     return;
   }
-  if (FL_TOF.objectDetected() && FR_TOF.objectDetected()) {
+  if (FL_TOF.objectDetected(FL_floor_avg) && FR_TOF.objectDetected(FR_floor_avg)) {
     setState(SHORT_BRAKE);
-  } else if (FL_TOF.objectDetected()) {
+  } else if (FL_TOF.objectDetected(FL_floor_avg)) {
     setState(ASSIST_RIGHT_TURN);
-  } else if (FR_TOF.objectDetected()) {
+  } else if (FR_TOF.objectDetected(FR_floor_avg)) {
     setState(ASSIST_LEFT_TURN);
   }
   // state remains to be no interference
@@ -115,7 +135,7 @@ void handleAssistLeftTurn() {
   // turn until we stop seeing the obstacle
   right_motor_power = TURN_MOTOR_VALUE;
   left_motor_power = STOP_MOTOR_VALUE;
-  while (FR_TOF.objectDetected()) {
+  while (FR_TOF.objectDetected(FR_floor_avg)) {
     commandMotor(left_motor_power, right_motor_power);
     Serial.print("Left turn!");
   }
@@ -126,7 +146,7 @@ void handleAssistRightTurn() {
   // turn until we stop seeing the obstacle
   right_motor_power = STOP_MOTOR_VALUE;
   left_motor_power = TURN_MOTOR_VALUE;
-  while (FL_TOF.objectDetected()) {
+  while (FL_TOF.objectDetected(FL_floor_avg)) {
     commandMotor(left_motor_power, right_motor_power);
     Serial.print("Right turn!");
   }
@@ -137,6 +157,10 @@ void setup() {
     Serial.begin(9600);
     Wire.begin();
     delay(100);
+
+    handleInit();
+
+    get_floor_readings();
 }
 
 void loop() {  
