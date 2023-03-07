@@ -57,21 +57,11 @@ namespace Sensors
         return distance_;
     }
 
-    bool TOF::objectDetected()
+    bool TOF::objectDetected(double floor_value)
     {
         double curr_reading = getDistance();
-        const double filter_constant = 0.1; // cm
-        if (prev_distance_ == -1)
-        {
-            prev_distance_ = curr_reading;
-            return false;
-        }
-        double delta = curr_reading - prev_distance_;
+        double delta = floor_value - curr_reading;
         bool changed = abs(delta) >= change_threshold;
-        if (changed)
-            prev_distance_ = curr_reading;
-        else
-            prev_distance_ += filter_constant * delta; // low-pass filter, would detect creeping changes
         return changed;
     }
 

@@ -17,7 +17,7 @@ namespace Sensors
         TOF(uint8_t bus);
         void init();
         double getDistance();
-        bool objectDetected();
+        bool objectDetected(double floor_value);
 
     private:
         void TCA9548A(uint8_t bus) // function of TCA9548A
