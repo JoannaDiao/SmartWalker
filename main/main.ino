@@ -33,6 +33,7 @@ Sensors::Motor right_motor(IN1, IN2, ENA);
 Servo servo;
 
 Sensors::Grip left_grip(44);
+Sensors::Grip right_grip(48);
 // Sensors::Grip right_grip(46, 48);
 
 const int TURN_MOTOR_VALUE = 60;
@@ -70,16 +71,26 @@ bool sittingDetected() {
     return sitting;
   } 
   
-  if (bl_dist < 20 && br_dist < 20) {
+  if (bl_dist < 25 && br_dist < 25) {
     sitting = true;
   } 
   
   return sitting;
 }
 
+bool handlesEngaged() {
+  bool lg = left_grip.handleEngaged();
+  bool rg = right_grip.handleEngaged();
+
+  if( rg && lg){
+      return true;
+  }
+  return false;
+}
+
 bool userWantsToSit() {
   // if user is touching the grip && back facing TOF distance decrease below a certain threshold --> user wants to sit down
-  bool g = left_grip.handleEngaged();
+  bool g = handlesEngaged();
   bool s = sittingDetected();
   if (g&&s) {
     return true;

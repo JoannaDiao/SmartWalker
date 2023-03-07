@@ -1,6 +1,8 @@
 #include <sensors.h>
 
 Sensors::Grip left_grip(44);
+Sensors::Grip right_grip(48);
+
 Sensors::TOF BR_TOF(4); // rear right TOF
 Sensors::TOF BL_TOF(5); // rear left TOF
 Sensors::TOF FL_TOF(6); // front left TOF
@@ -20,9 +22,8 @@ bool sittingDetected() {
     return sitting;
   } 
   
-  if (bl_dist < 20 && br_dist < 20) {
+  if (bl_dist < 25 && br_dist < 25) {
     sitting = true;
-    Serial.print("  tof say sitting");
   } 
   
   return sitting;
@@ -40,9 +41,21 @@ bool handleEngaged(int cap_level){
 bool userWantsToSit() {
   // if user is touching the grip && back facing TOF distance decrease below a certain threshold --> user wants to sit down
   //int capacitance = readCapacitance(44);
-  bool g = left_grip.handleEngaged();
-  bool s = sittingDetected();
-  if (g && s) {
+  
+  bool lg = left_grip.handleEngaged();
+  bool rg = right_grip.handleEngaged();
+
+//  bool lg = readCapacitance(44);
+//  bool rg = readCapacitance(48);
+
+  bool gripped = false;
+
+  if( rg && lg){
+      gripped = true;
+  }
+  
+  bool sitting = sittingDetected();
+  if (gripped && sitting) {
     return true;
   }
   return false;
@@ -146,9 +159,9 @@ void loop()
     if (userWantsToSit()) {
       Serial.println("User wants to sit!");
     } else {
-      Serial.println("No sitting!");
+      //Serial.println("No sitting!");
     }
-    delay(500);
+    delay(50);
 
 
 }
