@@ -60,6 +60,10 @@ namespace Sensors
     bool TOF::objectDetected(double floor_value)
     {
         double curr_reading = getDistance();
+        if (curr_reading == -1)
+        {
+            return false;
+        }
         double delta = floor_value - curr_reading;
         bool changed = abs(delta) >= change_threshold;
         return changed;

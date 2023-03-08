@@ -34,7 +34,6 @@ Servo servo;
 
 Sensors::Grip left_grip(44);
 Sensors::Grip right_grip(48);
-// Sensors::Grip right_grip(46, 48);
 
 const int TURN_MOTOR_VALUE = 60;
 const int STOP_MOTOR_VALUE = 0;
@@ -46,20 +45,39 @@ void setState(robot_state_t new_state) {
 }
 
 void floorCalibration(){
-  double left_sum = 0;
-  double right_sum = 0;
-  for (int i = 0; i < 50; i++){
+//  double left_sum = 0;
+//  double right_sum = 0;
+//  for (int i = 0; i < 125; i++){
+//    double left_dist = FL_TOF.getDistance();
+//    double right_dist = FR_TOF.getDistance();
+//    
+//    if( i >= 100){
+//      right_sum += right_dist;
+//      left_sum += left_dist;
+//    }
+//   }
+//
+//   FL_floor_avg = left_sum/25;
+//   FR_floor_avg = right_sum/25;
+
+  double left_floor = 0;
+  double right_floor = 0;
+  for (int i = 0; i < 124; i++){
     double left_dist = FL_TOF.getDistance();
     double right_dist = FR_TOF.getDistance();
+
+    //get front sensors to right values as well by just calling the TOFs
+    BR_TOF.getDistance();
+    BL_TOF.getDistance();
     
-    if( i >= 25){
-      right_sum += right_dist;
-      left_sum += left_dist;
+    if( i == 123){
+      right_floor = right_dist;
+      left_floor = left_dist;
     }
    }
 
-   FL_floor_avg = left_sum/25;
-   FR_floor_avg = right_sum/25;
+   FL_floor_avg = left_floor;
+   FR_floor_avg = right_floor;
 }
 
 bool sittingDetected() {
@@ -143,6 +161,8 @@ void handleInit() {
 
   Serial.println("handleInit");
   floorCalibration();
+  delay(500);
+
   Serial.print("left floor: ");
   Serial.print(FL_floor_avg);
   Serial.print("right floor: ");
@@ -156,23 +176,32 @@ void handleNoInterference() {
     // brake if wants to sit
   // check if any obstacles in front of either of the front TOFs
   // determine if assist turns or short brake are needed
-  if (userWantsToSit()) {
-    Serial.println("USER WANTS TO SIT");
-    setState(LONG_BRAKE);
-    return;
-  }
-  if (FL_TOF.objectDetected(FL_floor_avg) && FR_TOF.objectDetected(FR_floor_avg)) {
+
+  bool right_object = FR_TOF.objectDetected(FR_floor_avg);
+  bool left_object = FL_TOF.objectDetected(FL_floor_avg);
+  
+//  if (userWantsToSit()) {
+//    Serial.println("USER WANTS TO SIT");
+//    setState(LONG_BRAKE);
+//    return;
+//  }
+  if (left_object && right_object) {
     Serial.println("obstacle on both sides!");
     setState(SHORT_BRAKE);
-  } else if (FL_TOF.objectDetected(FL_floor_avg)) {
+  } else if (left_object) {
     Serial.println("obstacle on left side!");
     setState(ASSIST_RIGHT_TURN);
-  } else if (FR_TOF.objectDetected(FR_floor_avg)) {
+  } else if (right_object) {
     Serial.println("obstacle on right side!");
     setState(ASSIST_LEFT_TURN);
   }
   // state remains to be no interference
   return;
+}
+
+void commandMotor(int left_motor_power, int right_motor_power){
+  left_motor.forward(left_motor_power);
+  right_motor.forward(right_motor_power);
 }
 
 void handleAssistLeftTurn() {
@@ -181,7 +210,7 @@ void handleAssistLeftTurn() {
   right_motor_power = TURN_MOTOR_VALUE;
   left_motor_power = STOP_MOTOR_VALUE;
   while (FR_TOF.objectDetected(FR_floor_avg)) {
-    // commandMotor(left_motor_power, right_motor_power);
+    commandMotor(left_motor_power, right_motor_power);
     double fr = FR_TOF.getDistance();
     double fl = FL_TOF.getDistance();
     Serial.print("Left turn!");
@@ -200,7 +229,7 @@ void handleAssistRightTurn() {
   right_motor_power = STOP_MOTOR_VALUE;
   left_motor_power = TURN_MOTOR_VALUE;
   while (FL_TOF.objectDetected(FL_floor_avg)) {
-    // commandMotor(left_motor_power, right_motor_power);
+    commandMotor(left_motor_power, right_motor_power);
     Serial.println("Right turn!");
   }
   Serial.println("Right turn finished!");
@@ -216,20 +245,20 @@ void setup() {
 }
 
 void loop() {  
-  // int dist1 = BR_TOF.getDistance();
-  // int dist2 = BL_TOF.getDistance();
-  // int dist3 = FL_TOF.getDistance();
-  // int dist4 = FR_TOF.getDistance();
-  // Serial.print("    BR: ");
-  // Serial.print(dist1);
-  // Serial.print(", BL: ");
-  // Serial.print(dist2);
-  // Serial.print(", FL: ");
-  // Serial.print(dist3);
-  // Serial.print(", FR: ");
-  // Serial.print(dist4);
-  // Serial.print(" mm  ");
-  // Serial.println();
+//   double dist1 = BR_TOF.getDistance();
+//   double dist2 = BL_TOF.getDistance();
+//   double dist3 = FL_TOF.getDistance();
+//   double dist4 = FR_TOF.getDistance();
+//   Serial.print("    BR: ");
+//   Serial.print(dist1);
+//   Serial.print(", BL: ");
+//   Serial.print(dist2);
+//   Serial.print(", FL: ");
+//   Serial.print(dist3);
+//   Serial.print(", FR: ");
+//   Serial.print(dist4);
+//   Serial.print(" cm  ");
+//   Serial.println();
 
   switch (robot_state) {
     case INIT:

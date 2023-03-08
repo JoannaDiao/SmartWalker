@@ -33,7 +33,7 @@ namespace Sensors
         ExponentialFilter<long> ADCFilter{ExponentialFilter<long>(FilterWeight, 0)};
         double distance_;
         double prev_distance_ = -1;
-        const double change_threshold = 7.0; // cm
+        const double change_threshold = 8.0; // cm
     };
 
     class Grip
