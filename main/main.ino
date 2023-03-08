@@ -38,28 +38,13 @@ Sensors::Grip right_grip(48);
 const int TURN_MOTOR_VALUE = 60;
 const int STOP_MOTOR_VALUE = 0;
 const int LONG_BRAKE_TIME = 10000;
-const int SHORT_BRAKE_TIME = 5000;
+const int SHORT_BRAKE_TIME = 3000;
 
 void setState(robot_state_t new_state) {
   robot_state = new_state;
 }
 
 void floorCalibration(){
-//  double left_sum = 0;
-//  double right_sum = 0;
-//  for (int i = 0; i < 125; i++){
-//    double left_dist = FL_TOF.getDistance();
-//    double right_dist = FR_TOF.getDistance();
-//    
-//    if( i >= 100){
-//      right_sum += right_dist;
-//      left_sum += left_dist;
-//    }
-//   }
-//
-//   FL_floor_avg = left_sum/25;
-//   FR_floor_avg = right_sum/25;
-
   double left_floor = 0;
   double right_floor = 0;
   for (int i = 0; i < 124; i++){
@@ -118,25 +103,33 @@ bool userWantsToSit() {
 
 void Brake() {
   Serial.println("braking!");
-//  for (int pos = 80; pos <= 180; pos += 1) { // goes from 0 degrees to 180 degrees in steps of 1 degree
-//    servo.write(pos);
-//    delay(15); // waits 15ms for the servo to reach the position
-//  }
+  for (int pos = 80; pos <= 180; pos += 1) { // goes from 0 degrees to 180 degrees in steps of 1 degree
+    servo.write(pos);
+    delay(15); // waits 15ms for the servo to reach the position
+  }
+  delay(100);
 }
 
 void Unbrake() {
   Serial.println("unbraking!");
-//  for (int pos = 180; pos >= 80; pos -= 1) { // goes from 180 degrees to 0 degrees
-//    servo.write(pos);
-//    delay(15); // waits 15ms for the servo to reach the position
-//  }
+  for (int pos = 180; pos >= 80; pos -= 1) { // goes from 180 degrees to 0 degrees
+    servo.write(pos);
+    delay(15); // waits 15ms for the servo to reach the position
+  }
+  delay(100);
 }
 
 void handleLongBrake() {
   Serial.println("handleLongBrake");
   Brake();
-  delay(LONG_BRAKE_TIME);
+  delay(50);
+  
+  while(sittingDetected()){
+    delay(500);
+  }
+  
   Unbrake();
+  delay(50);
   setState(NO_INTERFERENCE);
 }
 
@@ -145,6 +138,8 @@ void handleShortBrake() {
   Brake();
   delay(SHORT_BRAKE_TIME);
   Unbrake();
+
+  delay(5000);
   setState(NO_INTERFERENCE);
 }
 
@@ -180,11 +175,11 @@ void handleNoInterference() {
   bool right_object = FR_TOF.objectDetected(FR_floor_avg);
   bool left_object = FL_TOF.objectDetected(FL_floor_avg);
   
-//  if (userWantsToSit()) {
-//    Serial.println("USER WANTS TO SIT");
-//    setState(LONG_BRAKE);
-//    return;
-//  }
+  if (userWantsToSit()) {
+    Serial.println("USER WANTS TO SIT");
+    setState(LONG_BRAKE);
+    return;
+  }
   if (left_object && right_object) {
     Serial.println("obstacle on both sides!");
     setState(SHORT_BRAKE);
@@ -210,16 +205,16 @@ void handleAssistLeftTurn() {
   right_motor_power = TURN_MOTOR_VALUE;
   left_motor_power = STOP_MOTOR_VALUE;
   while (FR_TOF.objectDetected(FR_floor_avg)) {
+    if(FL_TOF.objectDetected(FL_floor_avg)){
+      right_motor_power = STOP_MOTOR_VALUE;
+      commandMotor(left_motor_power, right_motor_power);
+      setState(SHORT_BRAKE);
+      return;
+    }
     commandMotor(left_motor_power, right_motor_power);
-    double fr = FR_TOF.getDistance();
-    double fl = FL_TOF.getDistance();
-    Serial.print("Left turn!");
-    Serial.print(" FR: ");
-    Serial.print(fr);
-    Serial.print(" FL: ");
-    Serial.print(fl);
-    Serial.println();
   }
+  right_motor_power = STOP_MOTOR_VALUE;
+  commandMotor(left_motor_power, right_motor_power);
   Serial.println("Left turn finished!");
   setState(NO_INTERFERENCE);
 }
@@ -229,9 +224,20 @@ void handleAssistRightTurn() {
   right_motor_power = STOP_MOTOR_VALUE;
   left_motor_power = TURN_MOTOR_VALUE;
   while (FL_TOF.objectDetected(FL_floor_avg)) {
+    if(FR_TOF.objectDetected(FR_floor_avg)){
+      left_motor_power = STOP_MOTOR_VALUE;
+      commandMotor(left_motor_power, right_motor_power);
+      setState(SHORT_BRAKE);
+      return;
+    }
+    
     commandMotor(left_motor_power, right_motor_power);
     Serial.println("Right turn!");
   }
+
+  left_motor_power = STOP_MOTOR_VALUE;
+  commandMotor(left_motor_power, right_motor_power);
+  
   Serial.println("Right turn finished!");
   setState(NO_INTERFERENCE);
 }

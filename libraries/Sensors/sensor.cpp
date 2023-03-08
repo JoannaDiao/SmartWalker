@@ -44,7 +44,7 @@ namespace Sensors
         }
         else
         {
-            Serial.print("OutOfRange  ");
+            // Serial.print("OutOfRange  ");
             distance_ = -1;
         }
 
