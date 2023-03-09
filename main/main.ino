@@ -127,6 +127,7 @@ void Unbrake() {
 
 void handleLongBrake() {
   Serial.println("handleLongBrake");
+  delay(500);
   Brake();
   delay(3000);
   
@@ -141,11 +142,12 @@ void handleLongBrake() {
 
 void handleShortBrake() {
   Serial.println("handleShortBrake");
+  delay(500);
   Brake();
   delay(SHORT_BRAKE_TIME);
   Unbrake();
 
-  delay(5000);
+  delay(3000);
   setState(NO_INTERFERENCE);
 }
 
@@ -201,7 +203,9 @@ void handleNoInterference() {
 }
 
 void commandMotor(int left_motor_power, int right_motor_power){
+  delay(50);
   left_motor.forward(left_motor_power);
+  delay(50);
   right_motor.forward(right_motor_power);
   delay(50);
 }
@@ -215,7 +219,7 @@ void handleAssistLeftTurn() {
     if(FL_TOF.objectDetected(FL_floor_avg)){
       right_motor_power = STOP_MOTOR_VALUE;
       commandMotor(left_motor_power, right_motor_power);
-      delay(50);
+      delay(500);
       setState(SHORT_BRAKE);
       return;
     }
@@ -237,7 +241,7 @@ void handleAssistRightTurn() {
     if(FR_TOF.objectDetected(FR_floor_avg)){
       left_motor_power = STOP_MOTOR_VALUE;
       commandMotor(left_motor_power, right_motor_power);
-      delay(50);
+      delay(500);
       setState(SHORT_BRAKE);
       return;
     }
