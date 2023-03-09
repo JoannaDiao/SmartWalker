@@ -66,19 +66,25 @@ void floorCalibration(){
 }
 
 bool sittingDetected() {
+  delay(50);
   double bl_dist = BL_TOF.getDistance();
   double br_dist = BR_TOF.getDistance();
-  bool sitting = false;
+
+  Serial.print("    BR: ");
+  Serial.print(br_dist);
+  Serial.print(", BL: ");
+  Serial.print(bl_dist);
+  Serial.println();
+  
   if (bl_dist == -1 || br_dist == -1) {
-    sitting = false;
-    return sitting;
+    return false;
   } 
   
   if (bl_dist < 25 && br_dist < 25) {
-    sitting = true;
+    return true;
   } 
   
-  return sitting;
+  return false;
 }
 
 bool handlesEngaged() {
@@ -122,14 +128,14 @@ void Unbrake() {
 void handleLongBrake() {
   Serial.println("handleLongBrake");
   Brake();
-  delay(50);
+  delay(3000);
   
   while(sittingDetected()){
     delay(500);
   }
-  
+  delay(1000);
   Unbrake();
-  delay(50);
+  delay(3000);
   setState(NO_INTERFERENCE);
 }
 
@@ -154,15 +160,15 @@ void handleInit() {
   delay(500);
   // TODO: check to see if the TOFs are properly initialized
 
-  Serial.println("handleInit");
+  //Serial.println("handleInit");
   floorCalibration();
   delay(500);
 
-  Serial.print("left floor: ");
-  Serial.print(FL_floor_avg);
-  Serial.print("right floor: ");
-  Serial.print(FR_floor_avg);
-  Serial.println();
+//  Serial.print("left floor: ");
+//  Serial.print(FL_floor_avg);
+//  Serial.print("right floor: ");
+//  Serial.print(FR_floor_avg);
+//  Serial.println();
   setState(NO_INTERFERENCE);
 }
 
@@ -197,6 +203,7 @@ void handleNoInterference() {
 void commandMotor(int left_motor_power, int right_motor_power){
   left_motor.forward(left_motor_power);
   right_motor.forward(right_motor_power);
+  delay(50);
 }
 
 void handleAssistLeftTurn() {
@@ -208,13 +215,16 @@ void handleAssistLeftTurn() {
     if(FL_TOF.objectDetected(FL_floor_avg)){
       right_motor_power = STOP_MOTOR_VALUE;
       commandMotor(left_motor_power, right_motor_power);
+      delay(50);
       setState(SHORT_BRAKE);
       return;
     }
     commandMotor(left_motor_power, right_motor_power);
+    delay(50);
   }
   right_motor_power = STOP_MOTOR_VALUE;
   commandMotor(left_motor_power, right_motor_power);
+  delay(50);
   Serial.println("Left turn finished!");
   setState(NO_INTERFERENCE);
 }
@@ -227,16 +237,19 @@ void handleAssistRightTurn() {
     if(FR_TOF.objectDetected(FR_floor_avg)){
       left_motor_power = STOP_MOTOR_VALUE;
       commandMotor(left_motor_power, right_motor_power);
+      delay(50);
       setState(SHORT_BRAKE);
       return;
     }
     
     commandMotor(left_motor_power, right_motor_power);
+    delay(50);
     Serial.println("Right turn!");
   }
 
   left_motor_power = STOP_MOTOR_VALUE;
   commandMotor(left_motor_power, right_motor_power);
+  delay(50);
   
   Serial.println("Right turn finished!");
   setState(NO_INTERFERENCE);
@@ -248,6 +261,7 @@ void setup() {
     delay(1000);
 
     robot_state = INIT;
+    handleInit();
 }
 
 void loop() {  
@@ -267,9 +281,9 @@ void loop() {
 //   Serial.println();
 
   switch (robot_state) {
-    case INIT:
-      handleInit();
-      break;
+//    case INIT:
+//      handleInit();
+//      break;
     case NO_INTERFERENCE:
       handleNoInterference();
       break;

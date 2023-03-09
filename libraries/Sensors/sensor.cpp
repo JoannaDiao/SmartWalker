@@ -81,7 +81,7 @@ namespace Sensors
         // Serial.print(curr_reading);
         // Serial.print(" ");
 
-        if (curr_reading >= 6)
+        if (curr_reading >= 8)
         {
             return true;
         }

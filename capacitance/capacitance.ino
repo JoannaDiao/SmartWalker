@@ -11,11 +11,11 @@ Sensors::TOF FR_TOF(7); // front right TOF
 bool sittingDetected() {
   double bl_dist = BL_TOF.getDistance();
   double br_dist = BR_TOF.getDistance();
-  Serial.print("BL: ");
-  Serial.print(bl_dist);
-  Serial.print("BR: ");
-  Serial.print(br_dist);
-  Serial.println();
+//  Serial.print("BL: ");
+//  Serial.print(bl_dist);
+//  Serial.print("BR: ");
+//  Serial.print(br_dist);
+//  Serial.println();
   bool sitting = false;
   if (bl_dist == -1 || br_dist == -1) {
     sitting = false;
@@ -42,11 +42,13 @@ bool userWantsToSit() {
   // if user is touching the grip && back facing TOF distance decrease below a certain threshold --> user wants to sit down
   //int capacitance = readCapacitance(44);
   
-  bool lg = left_grip.handleEngaged();
-  bool rg = right_grip.handleEngaged();
+//  bool lg = left_grip.handleEngaged();
+//  bool rg = right_grip.handleEngaged();
 
-//  bool lg = readCapacitance(44);
-//  bool rg = readCapacitance(48);
+  bool lg = handleEngaged(readCapacitance(44));
+  bool rg = handleEngaged(readCapacitance(48));
+
+  Serial.println();
 
   bool gripped = false;
 
@@ -161,7 +163,7 @@ void loop()
     } else {
       //Serial.println("No sitting!");
     }
-    delay(50);
+    delay(100);
 
 
 }
