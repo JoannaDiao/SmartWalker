@@ -11,7 +11,8 @@ VL53L0X sensor7;
 
 double floor_avg_left;
 double floor_avg_right;
-bool floor_avg_found = false;
+
+
 
 void TCA9548A(uint8_t bus)  //function of TCA9548A
 {
@@ -55,14 +56,7 @@ void setup() {
   // ms (e.g. sensor.startContinuous(100)).
   sensor.startContinuous();
   }
-}
 
-
-void get_floor_avg(){
-  if(floor_avg_found) {
-    return;  
-  }
-  
   //FLOOR AVERAGE CODE
   int left_sum = 0;
   int right_sum = 0;
@@ -96,7 +90,15 @@ void get_floor_avg(){
    right_average = right_average/10.0;
    floor_avg_left = left_average;
    floor_avg_right = right_average;
-   floor_avg_found = true;
+}
+
+
+bool obstacle_detected(double reading){
+  int change_threshold = 7;
+  
+  if(){
+    
+   }
   }
 
 //bool changed_significantly(double value) {
@@ -126,7 +128,6 @@ void get_floor_avg(){
 //    return sitting;
 //}
 
-bool obstacle_detected(){}
 
 void loop() {  
 //  for (int index = 4; index < 8; index++) {
@@ -158,7 +159,7 @@ void loop() {
 //    if (sensor.timeoutOccurred()) { Serial.print(" TIMEOUT"); }
 //    delay(100);
 //  }
-    get_floor_avg();
+   
 
     Serial.print("left average: ");
     Serial.print(floor_avg_left);

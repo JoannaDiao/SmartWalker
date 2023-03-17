@@ -156,8 +156,10 @@ void handleInit() {
   BL_TOF.init();
   FL_TOF.init();
   FR_TOF.init();
+  delay(100);
   left_motor.init();
   right_motor.init();
+  delay(500);
   servo.attach(8);
   delay(500);
   // TODO: check to see if the TOFs are properly initialized
@@ -171,6 +173,7 @@ void handleInit() {
 //  Serial.print("right floor: ");
 //  Serial.print(FR_floor_avg);
 //  Serial.println();
+  
   setState(NO_INTERFERENCE);
 }
 

@@ -19,8 +19,9 @@ void setup() {
 }
 
 void loop() {
-  turn_right(60);
-  delay(5000);
+  left_motor.forward(60);
+  right_motor.forward(60);
+  delay(10);
 }
 
 void turn_right(int speed) {

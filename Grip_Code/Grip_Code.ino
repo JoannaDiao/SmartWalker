@@ -9,11 +9,11 @@ Sensors::TOF FR_TOF(7); // front right TOF
 bool sittingDetected() {
   double bl_dist = BL_TOF.getDistance();
   double br_dist = BR_TOF.getDistance();
-//  Serial.print("BL: ");
-//  Serial.print(bl_dist);
-//  Serial.print("BR: ");
-//  Serial.print(br_dist);
-//  Serial.println();
+  Serial.print("BL: ");
+  Serial.print(bl_dist);
+  Serial.print("BR: ");
+  Serial.print(br_dist);
+  Serial.println();
   bool sitting = false;
   if (bl_dist == -1 || br_dist == -1) {
     sitting = false;
@@ -22,6 +22,7 @@ bool sittingDetected() {
   
   if (bl_dist < 20 && br_dist < 20) {
     sitting = true;
+    Serial.print("  tof say sitting");
   } 
   
   return sitting;

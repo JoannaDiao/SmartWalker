@@ -46,7 +46,9 @@ bool userWantsToSit() {
 //  bool rg = right_grip.handleEngaged();
 
   bool lg = handleEngaged(readCapacitance(44));
+  if(lg == true){Serial.println("left gripped");}
   bool rg = handleEngaged(readCapacitance(48));
+  if(rg == true){Serial.println("left gripped");}
 
   Serial.println();
 

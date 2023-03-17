@@ -11,13 +11,13 @@ void setup() {
 
 // Should not be constantly sending commands, need a delay or do something else on the robot other wise servo will overheat easily (if many commands are sent within a small time)
 void loop() {
-  for (pos = 80; pos <= 180; pos += 1) { // goes from 0 degrees to 180 degrees
+  for (pos = 80; pos <= 170; pos += 1) { // goes from 0 degrees to 180 degrees
     // in steps of 1 degree
     myservo.write(pos);              // tell servo to go to position in variable 'pos'
     delay(10);                       // waits 15ms for the servo to reach the position
   }
   delay(3000);
-  for (pos = 180; pos >= 80; pos -= 1) { // goes from 180 degrees to 0 degrees
+  for (pos = 170; pos >= 80; pos -= 1) { // goes from 180 degrees to 0 degrees
     myservo.write(pos);              // tell servo to go to position in variable 'pos'
     delay(10);                       // waits 15ms for the servo to reach the position
   }

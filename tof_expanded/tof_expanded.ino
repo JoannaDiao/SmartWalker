@@ -43,25 +43,22 @@ void setup() {
 }
 
 void loop() {  
-//    int dist1 = BR_TOF.getDistance();
-//    int dist2 = BL_TOF.getDistance();
-//    int dist3 = FL_TOF.getDistance();
-//    int dist4 = FR_TOF.getDistance();
-//    Serial.print("    BR: ");
-//    Serial.print(dist1);
-//    Serial.print(", BL: ");
-//    Serial.print(dist2);
-//    Serial.print("left avg: ");
-//    Serial.print(floor_avg_L);
-//    Serial.print("righ avg: ");
-//    Serial.print(floor_avg_R);
-//    Serial.print(", FL: ");
-//    Serial.print(FL_TOF.getDistance());
-//    Serial.print(", FR: ");
-//    Serial.print(FR_TOF.getDistance());
-//    Serial.println();
-//    Serial.print(" cm  ");
-//    Serial.println();
+    int dist1 = BR_TOF.getDistance();
+    int dist2 = BL_TOF.getDistance();
+    int dist3 = FL_TOF.getDistance();
+    int dist4 = FR_TOF.getDistance();
+    Serial.print("    BR: ");
+    Serial.print(dist1);
+    Serial.print(", BL: ");
+    Serial.print(dist2);
+
+    Serial.print(", FL: ");
+    Serial.print(FL_TOF.getDistance());
+    Serial.print(", FR: ");
+    Serial.print(FR_TOF.getDistance());
+    Serial.println();
+    Serial.print(" cm  ");
+    Serial.println();
   if (i == 0) {
     i++;
     Serial.print("FL_floor_avg: ");
