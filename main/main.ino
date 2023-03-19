@@ -142,6 +142,7 @@ void handleLongBrake() {
 
 void handleShortBrake() {
   Serial.println("handleShortBrake");
+  tone(45, NOTE_C7, 1000 / 8);
   delay(500);
   Brake();
   delay(SHORT_BRAKE_TIME);
@@ -195,10 +196,15 @@ void handleNoInterference() {
     Serial.println("USER WANTS TO SIT");
     setState(LONG_BRAKE);
     return;
-  } else if (!handlesEngaged()) {
-    Serial.println("One or both hands not holding grip! Brake for safety.");
-    setState(SHORT_BRAKE);
-    return;
+  }
+  bool brake = false;
+  while (!handlesEngaged()) {
+    brake = true;
+    Brake();
+    delay(500);
+  }
+  if (brake) {
+    Unbrake();
   }
 
   if (left_object && right_object) {
