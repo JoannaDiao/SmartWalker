@@ -152,6 +152,10 @@ void handleShortBrake() {
 }
 
 void handleInit() {
+  // LED indicators
+  pinMode(47, OUTPUT); // left LED
+  pinMode(49, OUTPUT); // right LED
+
   BR_TOF.init();
   BL_TOF.init();
   FL_TOF.init();
@@ -190,7 +194,12 @@ void handleNoInterference() {
     Serial.println("USER WANTS TO SIT");
     setState(LONG_BRAKE);
     return;
+  } else if (!handlesEngaged()) {
+    Serial.println("One or both hands not holding grip! Brake for safety.");
+    setState(SHORT_BRAKE);
+    return;
   }
+
   if (left_object && right_object) {
     Serial.println("obstacle on both sides!");
     setState(SHORT_BRAKE);
@@ -215,6 +224,7 @@ void commandMotor(int left_motor_power, int right_motor_power){
 
 void handleAssistLeftTurn() {
   // turn until we stop seeing the obstacle
+  digitalWrite(49, HIGH); // right LED on
 
   right_motor_power = TURN_MOTOR_VALUE;
   left_motor_power = STOP_MOTOR_VALUE;
@@ -227,8 +237,9 @@ void handleAssistLeftTurn() {
       return;
     }
     commandMotor(left_motor_power, right_motor_power);
-    delay(50);
+    delay(100);
   }
+  digitalWrite(49, LOW); // right LED off
   right_motor_power = STOP_MOTOR_VALUE;
   commandMotor(left_motor_power, right_motor_power);
   delay(50);
@@ -238,6 +249,8 @@ void handleAssistLeftTurn() {
 
 void handleAssistRightTurn() {
   // turn until we stop seeing the obstacle
+  digitalWrite(47, HIGH); // left LED on
+
   right_motor_power = STOP_MOTOR_VALUE;
   left_motor_power = TURN_MOTOR_VALUE;
   while (FL_TOF.objectDetected(FL_floor_avg)) {
@@ -250,9 +263,10 @@ void handleAssistRightTurn() {
     }
     
     commandMotor(left_motor_power, right_motor_power);
-    delay(50);
+    delay(100);
     Serial.println("Right turn!");
   }
+  digitalWrite(47, LOW); // left LED off
 
   left_motor_power = STOP_MOTOR_VALUE;
   commandMotor(left_motor_power, right_motor_power);
