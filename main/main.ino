@@ -1,5 +1,6 @@
 #include <Servo.h>
 #include <sensors.h>
+#include "pitches.h"
 
 typedef enum {
   INIT,
@@ -15,6 +16,8 @@ int left_motor_power = 0;
 int right_motor_power = 0;
 double FL_floor_avg;
 double FR_floor_avg;
+int left_led = 49;
+int right_led = 47;
 
 Sensors::TOF BR_TOF(4); // rear right TOF
 Sensors::TOF BL_TOF(5); // rear left TOF
@@ -155,8 +158,8 @@ void handleShortBrake() {
 
 void handleInit() {
   // LED indicators
-  pinMode(47, OUTPUT); // left LED
-  pinMode(49, OUTPUT); // right LED
+  pinMode(left_led, OUTPUT);
+  pinMode(right_led, OUTPUT);
 
   BR_TOF.init();
   BL_TOF.init();
@@ -172,7 +175,14 @@ void handleInit() {
 
   //Serial.println("handleInit");
   floorCalibration();
-  delay(500);
+  for (int i = 0; i < 2; i++) {
+    digitalWrite(left_led, HIGH);
+    digitalWrite(right_led, HIGH);
+    delay(150);
+    digitalWrite(left_led, LOW);
+    digitalWrite(right_led, LOW);
+    delay(150);
+  }
 
 //  Serial.print("left floor: ");
 //  Serial.print(FL_floor_avg);
@@ -237,7 +247,7 @@ void beep(){
 
 void handleAssistLeftTurn() {
   // turn until we stop seeing the obstacle
-  digitalWrite(49, HIGH); // right LED on
+  digitalWrite(right_led, HIGH); // right LED on
 
   right_motor_power = TURN_MOTOR_VALUE;
   left_motor_power = STOP_MOTOR_VALUE;
@@ -255,7 +265,7 @@ void handleAssistLeftTurn() {
   }
   delay(1000);
   noTone(45);
-  digitalWrite(49, LOW); // right LED off
+  digitalWrite(right_led, LOW); // right LED off
   right_motor_power = STOP_MOTOR_VALUE;
   commandMotor(left_motor_power, right_motor_power);
   delay(50);
@@ -265,7 +275,7 @@ void handleAssistLeftTurn() {
 
 void handleAssistRightTurn() {
   // turn until we stop seeing the obstacle
-  digitalWrite(47, HIGH); // left LED on
+  digitalWrite(left_led, HIGH); // left LED on
 
   right_motor_power = STOP_MOTOR_VALUE;
   left_motor_power = TURN_MOTOR_VALUE;
@@ -284,7 +294,7 @@ void handleAssistRightTurn() {
   }
   delay(1000);
   noTone(45);
-  digitalWrite(47, LOW); // left LED off
+  digitalWrite(left_led, LOW); // left LED off
 
   left_motor_power = STOP_MOTOR_VALUE;
   commandMotor(left_motor_power, right_motor_power);
