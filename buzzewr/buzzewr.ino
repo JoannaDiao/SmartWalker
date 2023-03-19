@@ -32,21 +32,21 @@ void setup() {
 }
 
 void loop() { // iterate over the notes of the melody:
-  for (int thisNote = 0; thisNote < 8; thisNote++) {
 
     // to calculate the note duration, take one second divided by the note type.
     //e.g. quarter note = 1000 / 4, eighth note = 1000/8, etc.
-    int noteDuration = 1000 / noteDurations[thisNote];
+    int noteDuration = 1000 / 8;
     
     // 45 is the pin number 
-    tone(45, melody[thisNote], noteDuration);
+    tone(45, NOTE_C7, noteDuration);
 
     // to distinguish the notes, set a minimum time between them.
     // the note's duration + 30% seems to work well:
     int pauseBetweenNotes = noteDuration * 1.30;
-    delay(pauseBetweenNotes);
+    delay(750);
     // stop the tone playing:
     noTone(45);
-  }
-  delay(1000);
+    //delay(1000);
+  
+
 }

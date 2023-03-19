@@ -109,7 +109,7 @@ bool userWantsToSit() {
 
 void Brake() {
   Serial.println("braking!");
-  for (int pos = 80; pos <= 180; pos += 1) { // goes from 0 degrees to 180 degrees in steps of 1 degree
+  for (int pos = 80; pos <= 170; pos += 1) { // goes from 0 degrees to 180 degrees in steps of 1 degree
     servo.write(pos);
     delay(15); // waits 15ms for the servo to reach the position
   }
@@ -118,7 +118,7 @@ void Brake() {
 
 void Unbrake() {
   Serial.println("unbraking!");
-  for (int pos = 180; pos >= 80; pos -= 1) { // goes from 180 degrees to 0 degrees
+  for (int pos = 170; pos >= 80; pos -= 1) { // goes from 180 degrees to 0 degrees
     servo.write(pos);
     delay(15); // waits 15ms for the servo to reach the position
   }
@@ -146,6 +146,7 @@ void handleShortBrake() {
   Brake();
   delay(SHORT_BRAKE_TIME);
   Unbrake();
+  noTone(45);
 
   delay(3000);
   setState(NO_INTERFERENCE);
@@ -222,6 +223,12 @@ void commandMotor(int left_motor_power, int right_motor_power){
   delay(50);
 }
 
+void beep(){
+    tone(45, NOTE_C7, 1000 / 8);
+    delay(750);
+    noTone(45);
+}
+
 void handleAssistLeftTurn() {
   // turn until we stop seeing the obstacle
   digitalWrite(49, HIGH); // right LED on
@@ -236,9 +243,12 @@ void handleAssistLeftTurn() {
       setState(SHORT_BRAKE);
       return;
     }
+    tone(45, NOTE_C7, 1000 / 8);
     commandMotor(left_motor_power, right_motor_power);
-    delay(100);
+    delay(50);
   }
+  delay(1000);
+  noTone(45);
   digitalWrite(49, LOW); // right LED off
   right_motor_power = STOP_MOTOR_VALUE;
   commandMotor(left_motor_power, right_motor_power);
@@ -261,11 +271,13 @@ void handleAssistRightTurn() {
       setState(SHORT_BRAKE);
       return;
     }
-    
+    tone(45, NOTE_C7, 1000 / 8);
     commandMotor(left_motor_power, right_motor_power);
-    delay(100);
+    delay(50);
     Serial.println("Right turn!");
   }
+  delay(1000);
+  noTone(45);
   digitalWrite(47, LOW); // left LED off
 
   left_motor_power = STOP_MOTOR_VALUE;
