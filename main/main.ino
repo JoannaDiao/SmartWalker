@@ -19,6 +19,8 @@ double FR_floor_avg;
 int left_led = 49;
 int right_led = 47;
 
+bool walker_disengaged;
+
 Sensors::TOF BR_TOF(4); // rear right TOF
 Sensors::TOF BL_TOF(5); // rear left TOF
 Sensors::TOF FL_TOF(6); // front left TOF
@@ -73,11 +75,11 @@ bool sittingDetected() {
   double bl_dist = BL_TOF.getDistance();
   double br_dist = BR_TOF.getDistance();
 
-  Serial.print("    BR: ");
-  Serial.print(br_dist);
-  Serial.print(", BL: ");
-  Serial.print(bl_dist);
-  Serial.println();
+//  Serial.print("    BR: ");
+//  Serial.print(br_dist);
+//  Serial.print(", BL: ");
+//  Serial.print(bl_dist);
+//  Serial.println();
   
   if (bl_dist == -1 || br_dist == -1) {
     return false;
@@ -104,7 +106,7 @@ bool userWantsToSit() {
   // if user is touching the grip && back facing TOF distance decrease below a certain threshold --> user wants to sit down
   bool g = handlesEngaged();
   bool s = sittingDetected();
-  if (g&&s) {
+  if (g && s) {
     return true;
   }
   return false;
@@ -113,7 +115,7 @@ bool userWantsToSit() {
 void Brake() {
   Serial.println("braking!");
   for (int pos = 80; pos <= 170; pos += 1) { // goes from 0 degrees to 180 degrees in steps of 1 degree
-    servo.write(pos);
+    //servo.write(pos);
     delay(15); // waits 15ms for the servo to reach the position
   }
   delay(100);
@@ -122,7 +124,7 @@ void Brake() {
 void Unbrake() {
   Serial.println("unbraking!");
   for (int pos = 170; pos >= 80; pos -= 1) { // goes from 180 degrees to 0 degrees
-    servo.write(pos);
+    //servo.write(pos);
     delay(15); // waits 15ms for the servo to reach the position
   }
   delay(100);
@@ -201,32 +203,44 @@ void handleNoInterference() {
 
   bool right_object = FR_TOF.objectDetected(FR_floor_avg);
   bool left_object = FL_TOF.objectDetected(FL_floor_avg);
+  bool handles_engaged = handlesEngaged();
   
-  if (userWantsToSit()) {
-    Serial.println("USER WANTS TO SIT");
-    setState(LONG_BRAKE);
-    return;
-  }
-  bool brake = false;
-  while (!handlesEngaged()) {
-    brake = true;
-    Brake();
+  bool braked = false;
+  if(!handles_engaged){
+    Serial.println("braking! ");
+    braked = true;
+    //Brake();
     delay(500);
   }
-  if (brake) {
-    Unbrake();
+  while (!handles_engaged) {
+    handles_engaged = handlesEngaged();
+    Serial.println("keeping brake on ");
+    delay(500);
+  }
+  if (braked) {
+    Serial.println("unbraking!  ");
+    delay(500);
+    //Unbrake();
+    delay(1500);
   }
 
-  if (left_object && right_object) {
-    Serial.println("obstacle on both sides!");
-    setState(SHORT_BRAKE);
-  } else if (left_object) {
-    Serial.println("obstacle on left side!");
-    setState(ASSIST_RIGHT_TURN);
-  } else if (right_object) {
-    Serial.println("obstacle on right side!");
-    setState(ASSIST_LEFT_TURN);
-  }
+  
+//  if (userWantsToSit()) {
+//    Serial.println("USER WANTS TO SIT");
+//    setState(LONG_BRAKE);
+//    return;
+//  }
+//  if (left_object && right_object) {
+//    Serial.println("obstacle on both sides!");
+//    setState(SHORT_BRAKE);
+//  } else if (left_object) {
+//    Serial.println("obstacle on left side!");
+//    setState(ASSIST_RIGHT_TURN);
+//  } else if (right_object) {
+//    Serial.println("obstacle on right side!");
+//    setState(ASSIST_LEFT_TURN);
+//  }
+
   // state remains to be no interference
   return;
 }

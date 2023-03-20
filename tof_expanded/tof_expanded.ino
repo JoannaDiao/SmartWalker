@@ -96,9 +96,9 @@ void loop() {
   if (FR_TOF.objectDetected(FR_floor_avg) && FL_TOF.objectDetected(FL_floor_avg)) {
     Serial.println("both!");
   } else if (FR_TOF.objectDetected(FR_floor_avg)) {
-    Serial.println("Left only");
-  } else if (FL_TOF.objectDetected(FL_floor_avg)) {
     Serial.println("Right only");
+  } else if (FL_TOF.objectDetected(FL_floor_avg)) {
+    Serial.println("Left only");
   }
   delay(15);
 }
