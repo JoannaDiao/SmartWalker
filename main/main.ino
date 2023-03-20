@@ -155,7 +155,9 @@ void handleShortBrake() {
 }
 
 void handleInit() {
+  Serial.println("handleInit");
   floorCalibration();
+  delay(500);
 
   for (int i = 0; i < 2; i++) {
     digitalWrite(left_led, HIGH);
@@ -184,6 +186,10 @@ void handleNoInterference() {
   bool right_object = FR_TOF.objectDetected(FR_floor_avg);
   bool left_object = FL_TOF.objectDetected(FL_floor_avg);
   bool handles_engaged = handlesEngaged();
+  Serial.print("handle engaged: ");
+  Serial.print(handles_engaged);
+  Serial.println();
+  
   
   bool braked = false;
   if(!handles_engaged){
@@ -205,23 +211,24 @@ void handleNoInterference() {
 //    delay(1500);
   }
   
-//  if (userWantsToSit()) {
-//    Serial.println("USER WANTS TO SIT");
-//    setState(LONG_BRAKE);
-//    return;
-//  }
-//  if (left_object && right_object) {
-//    Serial.println("obstacle on both sides!");
-//    setState(SHORT_BRAKE);
-//  } else if (left_object) {
-//    Serial.println("obstacle on left side!");
-//    setState(ASSIST_RIGHT_TURN);
-//  } else if (right_object) {
-//    Serial.println("obstacle on right side!");
-//    setState(ASSIST_LEFT_TURN);
-//  }
+  if (userWantsToSit()) {
+    Serial.println("USER WANTS TO SIT");
+    setState(LONG_BRAKE);
+    return;
+  }
+  if (left_object && right_object) {
+    Serial.println("obstacle on both sides!");
+    setState(SHORT_BRAKE);
+  } else if (left_object) {
+    Serial.println("obstacle on left side!");
+    setState(ASSIST_RIGHT_TURN);
+  } else if (right_object) {
+    Serial.println("obstacle on right side!");
+    setState(ASSIST_LEFT_TURN);
+  }
 
   // state remains to be no interference
+  delay(500);
   return;
 }
 
@@ -343,18 +350,18 @@ void loop() {
    case NO_INTERFERENCE:
      handleNoInterference();
      break;
-//   case ASSIST_LEFT_TURN:
-//     handleAssistLeftTurn();
-//     break;
-//   case ASSIST_RIGHT_TURN:
-//     handleAssistRightTurn();
-//     break;
-//   case SHORT_BRAKE:
-//     handleShortBrake();
-//     break;
-//   case LONG_BRAKE:
-//     handleLongBrake();
-//     break;
+   case ASSIST_LEFT_TURN:
+     handleAssistLeftTurn();
+     break;
+   case ASSIST_RIGHT_TURN:
+     handleAssistRightTurn();
+     break;
+   case SHORT_BRAKE:
+     handleShortBrake();
+     break;
+   case LONG_BRAKE:
+     handleLongBrake();
+     break;
  }
 
   delay(50);
