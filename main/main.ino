@@ -11,7 +11,7 @@ typedef enum {
   SHORT_BRAKE
 } robot_state_t;
 
-robot_state_t robot_state;
+robot_state_t robot_state = INIT;
 int left_motor_power = 0;
 int right_motor_power = 0;
 double FL_floor_avg;
@@ -155,32 +155,16 @@ void handleShortBrake() {
 }
 
 void handleInit() {
-  // LED indicators
-  pinMode(left_led, OUTPUT);
-  pinMode(right_led, OUTPUT);
+  floorCalibration();
 
-  BR_TOF.init();
-  BL_TOF.init();
-  FL_TOF.init();
-  FR_TOF.init();
-  delay(100);
-  left_motor.init();
-  right_motor.init();
-  delay(500);
-  servo.attach(8);
-  delay(500);
-  // TODO: check to see if the TOFs are properly initialized
-
-  //Serial.println("handleInit");
-//  floorCalibration();
-//  for (int i = 0; i < 2; i++) {
-//    digitalWrite(left_led, HIGH);
-//    digitalWrite(right_led, HIGH);
-//    delay(150);
-//    digitalWrite(left_led, LOW);
-//    digitalWrite(right_led, LOW);
-//    delay(150);
-//  }
+  for (int i = 0; i < 2; i++) {
+    digitalWrite(left_led, HIGH);
+    digitalWrite(right_led, HIGH);
+    delay(150);
+    digitalWrite(left_led, LOW);
+    digitalWrite(right_led, LOW);
+    delay(150);
+  }
 
 //  Serial.print("left floor: ");
 //  Serial.print(FL_floor_avg);
@@ -220,7 +204,6 @@ void handleNoInterference() {
     Unbrake();
 //    delay(1500);
   }
-
   
 //  if (userWantsToSit()) {
 //    Serial.println("USER WANTS TO SIT");
@@ -239,7 +222,6 @@ void handleNoInterference() {
 //  }
 
   // state remains to be no interference
-  setState(NO_INTERFERENCE);
   return;
 }
 
@@ -320,9 +302,22 @@ void setup() {
     Serial.begin(9600);
     Wire.begin();
     delay(1000);
+    // LED indicators
+    pinMode(left_led, OUTPUT);
+    pinMode(right_led, OUTPUT);
+
+    BR_TOF.init();
+    BL_TOF.init();
+    FL_TOF.init();
+    FR_TOF.init();
+    delay(100);
+    left_motor.init();
+    right_motor.init();
+    delay(500);
+    servo.attach(8);
+    delay(500);
 
     robot_state = INIT;
-    handleInit();
 }
 
 void loop() {  
@@ -341,27 +336,26 @@ void loop() {
 //   Serial.print(" cm  ");
 //   Serial.println();
 
-//  switch (robot_state) {
-//    case INIT:
-//      handleInit();
-//      break;
-//    case NO_INTERFERENCE:
-//      handleNoInterference();
-//      break;
-//    case ASSIST_LEFT_TURN:
-//      handleAssistLeftTurn();
-//      break;
-//    case ASSIST_RIGHT_TURN:
-//      handleAssistRightTurn();
-//      break;
-//    case SHORT_BRAKE:
-//      handleShortBrake();
-//      break;
-//    case LONG_BRAKE:
-//      handleLongBrake();
-//      break;
-//  }
-  handleNoInterference();
+ switch (robot_state) {
+   case INIT:
+     handleInit();
+     break;
+   case NO_INTERFERENCE:
+     handleNoInterference();
+     break;
+//   case ASSIST_LEFT_TURN:
+//     handleAssistLeftTurn();
+//     break;
+//   case ASSIST_RIGHT_TURN:
+//     handleAssistRightTurn();
+//     break;
+//   case SHORT_BRAKE:
+//     handleShortBrake();
+//     break;
+//   case LONG_BRAKE:
+//     handleLongBrake();
+//     break;
+ }
 
   delay(50);
 }
