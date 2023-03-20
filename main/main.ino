@@ -18,6 +18,7 @@ double FL_floor_avg;
 double FR_floor_avg;
 int left_led = 49;
 int right_led = 47;
+int pos = 0;
 
 Sensors::TOF BR_TOF(4); // rear right TOF
 Sensors::TOF BL_TOF(5); // rear left TOF
@@ -111,15 +112,18 @@ bool userWantsToSit() {
 }
 
 void Brake() {
-  for (int pos = 80; pos <= 170; pos += 1) { // goes from 0 degrees to 180 degrees in steps of 1 degree
-    servo.write(pos);
-    delay(10); // waits 15ms for the servo to reach the position
+  delay(2000);
+  for (pos = 80; pos <= 170; pos += 1) { // goes from 0 degrees to 180 degrees
+    // in steps of 1 degree
+    servo.write(pos);              // tell servo to go to position in variable 'pos'
+    delay(10);                       // waits 15ms for the servo to reach the position
   }
   delay(2000);
 }
 
 void Unbrake() {
-  for (int pos = 170; pos >= 80; pos -= 1) { // goes from 180 degrees to 0 degrees
+  delay(2000);
+  for (pos = 170; pos >= 80; pos -= 1) { // goes from 180 degrees to 0 degrees
     servo.write(pos);
     delay(10); // waits 15ms for the servo to reach the position
   }
@@ -143,12 +147,12 @@ void handleLongBrake() {
 
 void handleShortBrake() {
   Serial.println("handleShortBrake");
-  tone(45, NOTE_C7, 1000 / 8);
+//  tone(45, NOTE_C7, 1000 / 8);
   delay(500);
   Brake();
   delay(SHORT_BRAKE_TIME);
   Unbrake();
-  noTone(45);
+//  noTone(45);
 
   delay(3000);
   setState(NO_INTERFERENCE);
@@ -159,14 +163,14 @@ void handleInit() {
   floorCalibration();
   delay(500);
 
-  for (int i = 0; i < 2; i++) {
-    digitalWrite(left_led, HIGH);
-    digitalWrite(right_led, HIGH);
-    delay(150);
-    digitalWrite(left_led, LOW);
-    digitalWrite(right_led, LOW);
-    delay(150);
-  }
+//  for (int i = 0; i < 2; i++) {
+//    digitalWrite(left_led, HIGH);
+//    digitalWrite(right_led, HIGH);
+//    delay(150);
+//    digitalWrite(left_led, LOW);
+//    digitalWrite(right_led, LOW);
+//    delay(150);
+//  }
 
 //  Serial.print("left floor: ");
 //  Serial.print(FL_floor_avg);
@@ -229,6 +233,20 @@ void handleNoInterference() {
 
   // state remains to be no interference
   delay(500);
+
+  
+//  for (pos = 80; pos <= 170; pos += 1) { // goes from 0 degrees to 180 degrees
+//    // in steps of 1 degree
+//    servo.write(pos);              // tell servo to go to position in variable 'pos'
+//    delay(10);                       // waits 15ms for the servo to reach the position
+//  }
+//  delay(2000);
+//  for (pos = 170; pos >= 80; pos -= 1) { // goes from 180 degrees to 0 degrees
+//    servo.write(pos);              // tell servo to go to position in variable 'pos'
+//    delay(10);                       // waits 15ms for the servo to reach the position
+//  }
+//  delay(2000);
+  
   return;
 }
 
@@ -237,7 +255,7 @@ void commandMotor(int left_motor_power, int right_motor_power){
   left_motor.forward(left_motor_power);
   delay(50);
   right_motor.forward(right_motor_power);
-  delay(50);
+  delay(1000);
 }
 
 void beep(){
@@ -248,27 +266,27 @@ void beep(){
 
 void handleAssistLeftTurn() {
   // turn until we stop seeing the obstacle
-  digitalWrite(right_led, HIGH); // right LED on
+//  digitalWrite(right_led, HIGH); // right LED on
 
   right_motor_power = TURN_MOTOR_VALUE;
   left_motor_power = STOP_MOTOR_VALUE;
   while (FR_TOF.objectDetected(FR_floor_avg)) {
     if(FL_TOF.objectDetected(FL_floor_avg)){
       right_motor_power = STOP_MOTOR_VALUE;
-      commandMotor(left_motor_power, right_motor_power);
+//      commandMotor(left_motor_power, right_motor_power);
       delay(500);
       setState(SHORT_BRAKE);
       return;
     }
-    tone(45, NOTE_C7, 1000 / 8);
-    commandMotor(left_motor_power, right_motor_power);
+//    tone(45, NOTE_C7, 1000 / 8);
+//    commandMotor(left_motor_power, right_motor_power);
     delay(50);
   }
   delay(1000);
-  noTone(45);
-  digitalWrite(right_led, LOW); // right LED off
+//  noTone(45);
+//  digitalWrite(right_led, LOW); // right LED off
   right_motor_power = STOP_MOTOR_VALUE;
-  commandMotor(left_motor_power, right_motor_power);
+//  commandMotor(left_motor_power, right_motor_power);
   delay(50);
   Serial.println("Left turn finished!");
   setState(NO_INTERFERENCE);
@@ -276,29 +294,29 @@ void handleAssistLeftTurn() {
 
 void handleAssistRightTurn() {
   // turn until we stop seeing the obstacle
-  digitalWrite(left_led, HIGH); // left LED on
+//  digitalWrite(left_led, HIGH); // left LED on
 
   right_motor_power = STOP_MOTOR_VALUE;
   left_motor_power = TURN_MOTOR_VALUE;
   while (FL_TOF.objectDetected(FL_floor_avg)) {
     if(FR_TOF.objectDetected(FR_floor_avg)){
       left_motor_power = STOP_MOTOR_VALUE;
-      commandMotor(left_motor_power, right_motor_power);
+//      commandMotor(left_motor_power, right_motor_power);
       delay(500);
       setState(SHORT_BRAKE);
       return;
     }
-    tone(45, NOTE_C7, 1000 / 8);
-    commandMotor(left_motor_power, right_motor_power);
+//    tone(45, NOTE_C7, 1000 / 8);
+//    commandMotor(left_motor_power, right_motor_power);
     delay(50);
     Serial.println("Right turn!");
   }
   delay(1000);
-  noTone(45);
-  digitalWrite(left_led, LOW); // left LED off
+//  noTone(45);
+//  digitalWrite(left_led, LOW); // left LED off
 
   left_motor_power = STOP_MOTOR_VALUE;
-  commandMotor(left_motor_power, right_motor_power);
+//  commandMotor(left_motor_power, right_motor_power);
   delay(50);
   
   Serial.println("Right turn finished!");
@@ -310,8 +328,8 @@ void setup() {
     Wire.begin();
     delay(1000);
     // LED indicators
-    pinMode(left_led, OUTPUT);
-    pinMode(right_led, OUTPUT);
+//    pinMode(left_led, OUTPUT);
+//    pinMode(right_led, OUTPUT);
 
     BR_TOF.init();
     BL_TOF.init();
@@ -350,18 +368,18 @@ void loop() {
    case NO_INTERFERENCE:
      handleNoInterference();
      break;
-   case ASSIST_LEFT_TURN:
-     handleAssistLeftTurn();
-     break;
-   case ASSIST_RIGHT_TURN:
-     handleAssistRightTurn();
-     break;
-   case SHORT_BRAKE:
-     handleShortBrake();
-     break;
-   case LONG_BRAKE:
-     handleLongBrake();
-     break;
+//   case ASSIST_LEFT_TURN:
+//     handleAssistLeftTurn();
+//     break;
+//   case ASSIST_RIGHT_TURN:
+//     handleAssistRightTurn();
+//     break;
+//   case SHORT_BRAKE:
+//     handleShortBrake();
+//     break;
+//   case LONG_BRAKE:
+//     handleLongBrake();
+//     break;
  }
 
   delay(50);
