@@ -11,15 +11,13 @@ typedef enum {
   SHORT_BRAKE
 } robot_state_t;
 
-robot_state_t robot_state = INIT;
+robot_state_t robot_state;
 int left_motor_power = 0;
 int right_motor_power = 0;
 double FL_floor_avg;
 double FR_floor_avg;
 int left_led = 49;
 int right_led = 47;
-
-bool walker_disengaged;
 
 Sensors::TOF BR_TOF(4); // rear right TOF
 Sensors::TOF BL_TOF(5); // rear left TOF
@@ -113,21 +111,19 @@ bool userWantsToSit() {
 }
 
 void Brake() {
-  Serial.println("braking!");
   for (int pos = 80; pos <= 170; pos += 1) { // goes from 0 degrees to 180 degrees in steps of 1 degree
-    //servo.write(pos);
-    delay(15); // waits 15ms for the servo to reach the position
+    servo.write(pos);
+    delay(10); // waits 15ms for the servo to reach the position
   }
-  delay(100);
+  delay(2000);
 }
 
 void Unbrake() {
-  Serial.println("unbraking!");
   for (int pos = 170; pos >= 80; pos -= 1) { // goes from 180 degrees to 0 degrees
-    //servo.write(pos);
-    delay(15); // waits 15ms for the servo to reach the position
+    servo.write(pos);
+    delay(10); // waits 15ms for the servo to reach the position
   }
-  delay(100);
+  delay(2000);
 }
 
 void handleLongBrake() {
@@ -176,15 +172,15 @@ void handleInit() {
   // TODO: check to see if the TOFs are properly initialized
 
   //Serial.println("handleInit");
-  floorCalibration();
-  for (int i = 0; i < 2; i++) {
-    digitalWrite(left_led, HIGH);
-    digitalWrite(right_led, HIGH);
-    delay(150);
-    digitalWrite(left_led, LOW);
-    digitalWrite(right_led, LOW);
-    delay(150);
-  }
+//  floorCalibration();
+//  for (int i = 0; i < 2; i++) {
+//    digitalWrite(left_led, HIGH);
+//    digitalWrite(right_led, HIGH);
+//    delay(150);
+//    digitalWrite(left_led, LOW);
+//    digitalWrite(right_led, LOW);
+//    delay(150);
+//  }
 
 //  Serial.print("left floor: ");
 //  Serial.print(FL_floor_avg);
@@ -207,10 +203,11 @@ void handleNoInterference() {
   
   bool braked = false;
   if(!handles_engaged){
+    delay(500);
     Serial.println("braking! ");
     braked = true;
-    //Brake();
-    delay(500);
+    Brake();
+//    delay(1000);
   }
   while (!handles_engaged) {
     handles_engaged = handlesEngaged();
@@ -219,9 +216,9 @@ void handleNoInterference() {
   }
   if (braked) {
     Serial.println("unbraking!  ");
-    delay(500);
-    //Unbrake();
-    delay(1500);
+//    delay(1000);
+    Unbrake();
+//    delay(1500);
   }
 
   
@@ -242,6 +239,7 @@ void handleNoInterference() {
 //  }
 
   // state remains to be no interference
+  setState(NO_INTERFERENCE);
   return;
 }
 
@@ -343,26 +341,27 @@ void loop() {
 //   Serial.print(" cm  ");
 //   Serial.println();
 
-  switch (robot_state) {
+//  switch (robot_state) {
 //    case INIT:
 //      handleInit();
 //      break;
-    case NO_INTERFERENCE:
-      handleNoInterference();
-      break;
-    case ASSIST_LEFT_TURN:
-      handleAssistLeftTurn();
-      break;
-    case ASSIST_RIGHT_TURN:
-      handleAssistRightTurn();
-      break;
-    case SHORT_BRAKE:
-      handleShortBrake();
-      break;
-    case LONG_BRAKE:
-      handleLongBrake();
-      break;
-  }
+//    case NO_INTERFERENCE:
+//      handleNoInterference();
+//      break;
+//    case ASSIST_LEFT_TURN:
+//      handleAssistLeftTurn();
+//      break;
+//    case ASSIST_RIGHT_TURN:
+//      handleAssistRightTurn();
+//      break;
+//    case SHORT_BRAKE:
+//      handleShortBrake();
+//      break;
+//    case LONG_BRAKE:
+//      handleLongBrake();
+//      break;
+//  }
+  handleNoInterference();
 
   delay(50);
 }

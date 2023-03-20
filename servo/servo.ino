@@ -16,11 +16,11 @@ void loop() {
     myservo.write(pos);              // tell servo to go to position in variable 'pos'
     delay(10);                       // waits 15ms for the servo to reach the position
   }
-  delay(3000);
+  delay(2000);
   for (pos = 170; pos >= 80; pos -= 1) { // goes from 180 degrees to 0 degrees
     myservo.write(pos);              // tell servo to go to position in variable 'pos'
     delay(10);                       // waits 15ms for the servo to reach the position
   }
-  delay(3000);
+  delay(2000);
 
 }
