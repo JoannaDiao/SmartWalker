@@ -15,7 +15,7 @@ bool sittingDetected() {
 //  Serial.print(bl_dist);
 //  Serial.print("BR: ");
 //  Serial.print(br_dist);
-//  Serial.println();
+  Serial.println();
   bool sitting = false;
   if (bl_dist == -1 || br_dist == -1) {
     sitting = false;
@@ -46,16 +46,17 @@ bool userWantsToSit() {
 //  bool rg = right_grip.handleEngaged();
 
   bool lg = handleEngaged(readCapacitance(44));
-  if(lg == true){Serial.print(" left gripped ");}
+  //if(lg == true){Serial.print(" left gripped ");}
   bool rg = handleEngaged(readCapacitance(48));
-  if(rg == true){Serial.print(" right gripped ");}
+  //if(rg == true){Serial.print(" right gripped ");}
 
-  Serial.println();
+  //Serial.println();
 
   bool gripped = false;
 
   if( rg && lg){
       gripped = true;
+      //Serial.print(" both gripped ");
   }
   
   bool sitting = sittingDetected();
