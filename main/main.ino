@@ -42,7 +42,7 @@ Sensors::Grip right_grip(48);
 const int TURN_MOTOR_VALUE = 60;
 const int STOP_MOTOR_VALUE = 0;
 const int LONG_BRAKE_TIME = 10000;
-const int SHORT_BRAKE_TIME = 3000;
+const int SHORT_BRAKE_TIME = 1500;
 
 void setState(robot_state_t new_state) {
   robot_state = new_state;
@@ -74,11 +74,11 @@ bool sittingDetected() {
   double bl_dist = BL_TOF.getDistance();
   double br_dist = BR_TOF.getDistance();
 
-//  Serial.print("    BR: ");
-//  Serial.print(br_dist);
-//  Serial.print(", BL: ");
-//  Serial.print(bl_dist);
-//  Serial.println();
+  Serial.print("    BR: ");
+  Serial.print(br_dist);
+  Serial.print(", BL: ");
+  Serial.print(bl_dist);
+  Serial.println();
   
   if (bl_dist == -1 || br_dist == -1) {
     return false;
@@ -112,47 +112,56 @@ bool userWantsToSit() {
 }
 
 void Brake() {
+  delay(100);
   for (pos = 80; pos <= 170; pos += 1) { // goes from 0 degrees to 180 degrees
     // in steps of 1 degree
     servo.write(pos);              // tell servo to go to position in variable 'pos'
     delay(10);                       // waits 15ms for the servo to reach the position
   }
-  delay(2000);
+  delay(750);
 }
 
 void Unbrake() {
+  delay(100);
   for (pos = 170; pos >= 80; pos -= 1) { // goes from 180 degrees to 0 degrees
     servo.write(pos);
     delay(10); // waits 15ms for the servo to reach the position
   }
-  delay(2000);
+  delay(750);
 }
 
 void handleLongBrake() {
   Serial.println("handleLongBrake");
-  delay(500);
   Brake();
-  delay(3000);
   
   while(sittingDetected()){
-    delay(500);
+    delay(100);
   }
-  delay(1000);
   Unbrake();
-  delay(3000);
   setState(NO_INTERFERENCE);
 }
 
 void handleShortBrake() {
   Serial.println("handleShortBrake");
-//  tone(45, NOTE_C7, 1000 / 8);
-  delay(500);
+  tone(45, NOTE_C7, 1000 / 8);
+  digitalWrite(right_led, HIGH);
+  digitalWrite(left_led, HIGH);
+  delay(100);
   Brake();
+  noTone(45);
+  tone(45, NOTE_C7, 1000 / 8);
   delay(SHORT_BRAKE_TIME);
+  digitalWrite(right_led, LOW);
+  digitalWrite(left_led, LOW);
   Unbrake();
-//  noTone(45);
+  noTone(45);
 
   delay(3000);
+  for(int i=0; i<5; i++) {
+    double left_dist = FL_TOF.getDistance();
+    double right_dist = FR_TOF.getDistance();
+  }
+  
   setState(NO_INTERFERENCE);
 }
 
@@ -185,8 +194,6 @@ void handleNoInterference() {
   // check if any obstacles in front of either of the front TOFs
   // determine if assist turns or short brake are needed
 
-  bool right_object = FR_TOF.objectDetected(FR_floor_avg);
-  bool left_object = FL_TOF.objectDetected(FL_floor_avg);
   bool handles_engaged = handlesEngaged();
   Serial.print("handle engaged: ");
   Serial.print(handles_engaged);
@@ -195,33 +202,33 @@ void handleNoInterference() {
   
   bool braked = false;
   if(!handles_engaged){
-    delay(500);
     Serial.println("braking! ");
     braked = true;
     Brake();
-//    delay(1000);
   }
   while (!handles_engaged) {
     handles_engaged = handlesEngaged();
     Serial.println("keeping brake on ");
-    delay(500);
+    delay(50);
   }
   if (braked) {
     Serial.println("unbraking!  ");
-//    delay(1000);
     Unbrake();
-//    delay(1500);
   }
+
+  bool right_object = FR_TOF.objectDetected(FR_floor_avg);
+  bool left_object = FL_TOF.objectDetected(FL_floor_avg);
   
   if (userWantsToSit()) {
     Serial.println("USER WANTS TO SIT");
     setState(LONG_BRAKE);
     return;
   }
-  if (left_object && right_object) {
-    Serial.println("obstacle on both sides!");
-    setState(SHORT_BRAKE);
-  } else if (left_object) {
+//  if (left_object && right_object) {
+//    Serial.println("obstacle on both sides!");
+//    setState(SHORT_BRAKE);
+//  } else 
+  if (left_object) {
     Serial.println("obstacle on left side!");
     setState(ASSIST_RIGHT_TURN);
   } else if (right_object) {
@@ -230,8 +237,6 @@ void handleNoInterference() {
   }
 
   // state remains to be no interference
-  delay(500);
-
   
 //  for (pos = 80; pos <= 170; pos += 1) { // goes from 0 degrees to 180 degrees
 //    // in steps of 1 degree
@@ -270,17 +275,16 @@ void handleAssistLeftTurn() {
   left_motor_power = STOP_MOTOR_VALUE;
   while (FR_TOF.objectDetected(FR_floor_avg)) {
     if(FL_TOF.objectDetected(FL_floor_avg)){
+      
       right_motor_power = STOP_MOTOR_VALUE;
       commandMotor(left_motor_power, right_motor_power);
-      delay(500);
       setState(SHORT_BRAKE);
       return;
     }
     tone(45, NOTE_C7, 1000 / 8);
     commandMotor(left_motor_power, right_motor_power);
-    delay(50);
   }
-  delay(1000);
+  delay(500);
   noTone(45);
   digitalWrite(right_led, LOW); // right LED off
   right_motor_power = STOP_MOTOR_VALUE;
@@ -300,7 +304,6 @@ void handleAssistRightTurn() {
     if(FR_TOF.objectDetected(FR_floor_avg)){
       left_motor_power = STOP_MOTOR_VALUE;
       commandMotor(left_motor_power, right_motor_power);
-      delay(500);
       setState(SHORT_BRAKE);
       return;
     }
@@ -309,7 +312,7 @@ void handleAssistRightTurn() {
     delay(50);
     Serial.println("Right turn!");
   }
-  delay(1000);
+  delay(500);
   noTone(45);
   digitalWrite(left_led, LOW); // left LED off
 
