@@ -235,6 +235,7 @@ void handleNoInterference() {
     Serial.println("obstacle on right side!");
     setState(ASSIST_LEFT_TURN);
   }
+  delay(100);
 
   // state remains to be no interference
   
@@ -278,11 +279,13 @@ void handleAssistLeftTurn() {
       
       right_motor_power = STOP_MOTOR_VALUE;
       commandMotor(left_motor_power, right_motor_power);
+      delay(100);
       setState(SHORT_BRAKE);
       return;
     }
     tone(45, NOTE_C7, 1000 / 8);
     commandMotor(left_motor_power, right_motor_power);
+    delay(50);
   }
   delay(500);
   noTone(45);
@@ -304,6 +307,7 @@ void handleAssistRightTurn() {
     if(FR_TOF.objectDetected(FR_floor_avg)){
       left_motor_power = STOP_MOTOR_VALUE;
       commandMotor(left_motor_power, right_motor_power);
+      delay(100);
       setState(SHORT_BRAKE);
       return;
     }
